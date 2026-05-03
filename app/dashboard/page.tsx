@@ -10,7 +10,17 @@ export default async function Dashboard() {
     const session = await getSession();
     await connectDB();
 
-    const board = await Board.findOne({ userId: session?.user?.id, name: "Job Hunt" }).populate({ path: "columns", populate: { path: "jobApplications" } });
+    const boardDoc = await Board.findOne({
+        userId: session?.user?.id,
+        name: "Job Hunt",
+    }).populate({
+        path: "columns",
+        populate: {
+            path: "jobApplications",
+        },
+    });
+
+    const board = JSON.parse(JSON.stringify(boardDoc));
 
     if (!session?.user) {
         redirect("/sign-in");
