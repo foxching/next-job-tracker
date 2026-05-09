@@ -7,6 +7,12 @@ import { initializeUserBoard } from "../init-user-board";
 
 export const auth = betterAuth({
     database: mongodbAdapter(await getDb()),
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 60 * 60,
+        },
+    },
     emailAndPassword: {
         enabled: true,
     },

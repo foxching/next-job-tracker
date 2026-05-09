@@ -3,15 +3,15 @@ import { getSession } from "@/lib/auth/auth";
 import connectDB from "@/lib/db";
 import { Board } from "@/lib/models";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
+async function getBoard(userId: string) {
+    "use cache";
 
-
-export default async function Dashboard() {
-    const session = await getSession();
     await connectDB();
 
     const boardDoc = await Board.findOne({
-        userId: session?.user?.id,
+        userId: userId,
         name: "Job Hunt",
     }).populate({
         path: "columns",
@@ -20,7 +20,16 @@ export default async function Dashboard() {
         },
     });
 
+    if (!boardDoc) return null;
+
     const board = JSON.parse(JSON.stringify(boardDoc));
+
+    return board;
+}
+
+async function DashboardPage() {
+    const session = await getSession();
+    const board = await getBoard(session?.user.id ?? "");
 
     if (!session?.user) {
         redirect("/sign-in");
@@ -37,4 +46,11 @@ export default async function Dashboard() {
             </div>
         </div>
     )
+}
+export default async function Dashboard() {
+    return (
+        <Suspense fallback={<p>Loading...</p>}>
+            <DashboardPage />
+        </Suspense>
+    );
 }
