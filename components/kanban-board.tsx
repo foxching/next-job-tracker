@@ -44,8 +44,8 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
 
     return (
         <Card className="min-w-[300px] flex-shrink-0 shadow-md p-0">
-            <CardHeader className={`${config.color} text-white rounded-t-lg pb-3`}>
-                <div className=" flex items-center justify-between ">
+            <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3`}>
+                <div className=" flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         {config.icon}
                         <CardTitle className="text-white text-base font-semibold">{column.name}</CardTitle>
@@ -94,8 +94,8 @@ export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
 
     return (
         <>
-            <div>
-                <div>
+            <div className="space-y-4">
+                <div className="flex gap-4 overflow-x-auto pb-4">
                     {columns.map((col, key) => {
                         const config = COLUMN_CONFIG[key] || { color: "bg-gray-500", icon: <Calendar className="h-4 w-4" /> };
                         return (
