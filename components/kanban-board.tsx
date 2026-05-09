@@ -3,7 +3,7 @@ import { Award, Calendar, CheckCircle2, Mic, MoreHorizontal, MoreVertical, Trash
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
-import CreateJobApplicationDialog from "./components/create-job-dialog";
+import CreateJobApplicationDialog from "./create-job-dialog";
 import JobApplicationCard from "./job-application-card";
 
 interface KanbanBoardProps {
