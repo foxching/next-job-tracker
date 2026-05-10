@@ -26,6 +26,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { useState } from "react";
 import { useBoard } from "@/lib/hooks/useBoard";
+import { deleteColumn } from "@/lib/actions/column";
 
 interface KanbanBoardProps {
     board: Board;
@@ -71,6 +72,20 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
         },
     });
 
+    async function handleDelete() {
+        try {
+            const result = await deleteColumn(column._id);
+
+            if (result.error) {
+                console.error("Failed to delete column:", result.error);
+            }
+        } catch (err) {
+            console.error("Failed to delete column: ", err);
+        }
+    }
+
+
+
     return (
         <Card className="min-w-[300px] flex-shrink-0 shadow-md p-0">
             <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3`}>
@@ -86,9 +101,9 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete Column
+                                Delete
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
