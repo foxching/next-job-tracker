@@ -1,9 +1,9 @@
 "use client";
 
-import { Briefcase } from "lucide-react"
+import { Briefcase, User } from "lucide-react"
 import Link from "next/link"
 import { Button } from "./ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import SignOutButton from "./sign-out-btn";
 import { useSession } from "@/lib/auth/auth-client";
@@ -44,16 +44,25 @@ export default function Navbar() {
                                     </DropdownMenuTrigger>
 
                                     <DropdownMenuContent className="w-56" align="end">
-                                        <DropdownMenuLabel className="font-normal">
-                                            <div className="flex flex-col space-y-1">
-                                                <p className="text-sm font-medium leading-none">
-                                                    {session.user.name}
-                                                </p>
-                                                <p className="text-xs leading-none text-muted-foreground">
-                                                    {session.user.email}
-                                                </p>
-                                            </div>
-                                        </DropdownMenuLabel>
+                                        <DropdownMenuGroup>
+                                            <DropdownMenuLabel className="font-normal">
+                                                <div className="flex flex-col space-y-1">
+                                                    <p className="text-sm font-medium leading-none">
+                                                        {session.user.name}
+                                                    </p>
+                                                    <p className="text-xs leading-none text-muted-foreground">
+                                                        {session.user.email}
+                                                    </p>
+                                                </div>
+                                            </DropdownMenuLabel>
+                                            <Link href={`/profile/${session.user.id}`}>
+                                                <DropdownMenuItem>
+                                                    <User className="h-4 w-4" />
+                                                    <span>Profile</span>
+                                                </DropdownMenuItem>
+                                            </Link>
+                                        </DropdownMenuGroup>
+                                        <DropdownMenuSeparator />
                                         <SignOutButton />
                                     </DropdownMenuContent>
                                 </DropdownMenu>
