@@ -1,7 +1,6 @@
 import ProfileContent from "@/components/profile-content";
 import { Suspense } from "react";
 
-
 type Props = {
     params: {
         userId: string;
@@ -9,10 +8,10 @@ type Props = {
 };
 
 export default async function ProfilePage({ params }: Props) {
-    const resolvedParams = await params;
+    const { userId } = await params;
     return (
         <Suspense fallback={<div className="p-6">Loading profile...</div>}>
-            <ProfileContent params={resolvedParams} />
+            <ProfileContent userId={userId} />
         </Suspense>
     );
 }
