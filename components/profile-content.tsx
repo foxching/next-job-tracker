@@ -1,79 +1,101 @@
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+"use client";
+
+
+
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
+
+import { User } from 'lucide-react';
+import PersonalInformation from "./profile-tabs/personal-information";
+import Security from "./profile-tabs/security";
+import Settings from "./profile-tabs/settings";
 
 type Props = {
-    params: Promise<{
-        userId: string;
-    }>;
+    userId: string;
 };
 
-export default async function ProfileContent({ params }: Props) {
-    const { userId } = await params;
-
+export default function ProfileContent({
+    userId,
+}: Props) {
     return (
         <div className="min-h-screen bg-gray-100">
             <div className="container mx-auto p-6">
-                <div className="grid grid-cols-1 gap-6 rounded-2xl bg-white p-6 shadow-md md:grid-cols-3">
 
-                    {/* Left Side */}
-                    <div className="flex flex-col items-center border-b pb-6 md:border-b-0 md:border-r md:pb-0">
-                        <Image
-                            src="https://via.placeholder.com/150"
-                            alt="Profile Picture"
-                            width={150}
-                            height={150}
-                            className="rounded-full border object-cover"
-                        />
+                <Tabs
+                    defaultValue="personal"
+                    className="rounded-2xl bg-white p-6 shadow-md"
+                >
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
 
-                        <Button className="mt-4 w-full">
-                            Edit Profile
-                        </Button>
+                        {/* Left Sidebar */}
+                        <div className="border-r pr-4">
 
-                        <div className="mt-4 text-center">
-                            <h2 className="text-xl font-semibold">User Profile</h2>
-                            <p className="text-sm text-gray-500">
-                                ID: {userId}
-                            </p>
-                        </div>
-                    </div>
+                            <div className="mb-6 flex flex-col items-center">
 
-                    {/* Right Side */}
-                    <div className="md:col-span-2">
-                        <h1 className="mb-6 text-2xl font-bold">
-                            Profile Information
-                        </h1>
+                                <User className="h-24 w-24" />
 
-                        <div className="space-y-5">
+                                <h2 className="mt-4 font-semibold">
+                                    User Profile
+                                </h2>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="name">Name</Label>
-                                <Input
-                                    id="name"
-                                    type="text"
-                                    placeholder="Enter your name"
-                                    defaultValue="John Doe"
-                                />
+                                <p className="text-sm text-gray-500">
+                                    ID: {userId}
+                                </p>
+
                             </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="Enter your email"
-                                    defaultValue="john@example.com"
-                                />
-                            </div>
+                            <TabsList className="flex h-auto w-full flex-col space-y-2 bg-transparent gap-2 p-0">
 
-                            <Button className="mt-4">
-                                Save Changes
-                            </Button>
+                                <TabsTrigger
+                                    value="personal"
+                                    className="w-full justify-start"
+                                >
+                                    Personal Information
+                                </TabsTrigger>
+
+                                <TabsTrigger
+                                    value="security"
+                                    className="w-full justify-start"
+                                >
+                                    Security
+                                </TabsTrigger>
+
+                                <TabsTrigger
+                                    value="settings"
+                                    className="w-full justify-start"
+                                >
+                                    Settings
+                                </TabsTrigger>
+
+                            </TabsList>
                         </div>
-                    </div>
 
-                </div>
+                        {/* Right Content */}
+                        <div className="md:col-span-3">
+
+                            <TabsContent value="personal">
+                                <PersonalInformation
+                                    userId={userId}
+                                />
+                            </TabsContent>
+
+                            <TabsContent value="security">
+                                <Security />
+                            </TabsContent>
+
+                            <TabsContent value="settings">
+                                <Settings />
+                            </TabsContent>
+
+                        </div>
+
+                    </div>
+                </Tabs>
+
             </div>
         </div>
     );
