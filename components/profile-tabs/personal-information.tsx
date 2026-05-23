@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-
+import { updateName } from "@/lib/actions/user";
+import { useRouter } from "next/navigation";
 type Props = {
     user: {
         email?: string;
@@ -17,27 +18,23 @@ type Props = {
 export default function PersonalInformation({ user }: Props) {
     const [name, setName] = useState(user?.name || "");
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
+
+
+    useEffect(() => {
+        setName(user?.name || "");
+    }, [user?.name]);
 
     async function handleSubmit() {
         try {
             setLoading(true);
 
-            const res = await fetch("/api/user/update-name", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    name,
-                }),
-            });
+            const formData = new FormData();
+            formData.append("name", name);
 
-            const data = await res.json();
+            await updateName(formData);
 
-            if (!res.ok) {
-                throw new Error(data.message);
-            }
-
+            router.refresh(); // re-fetches server props, updates user.name
             alert("Name updated successfully!");
         } catch (error) {
             console.error(error);

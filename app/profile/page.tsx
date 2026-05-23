@@ -1,11 +1,16 @@
-"use client";
-
 import ProfileContent from "@/components/profile-content";
-import { useSession } from "@/lib/auth/auth-client";
+import { getSession } from "@/lib/auth/auth";
+import { redirect } from "next/navigation";
 
-export default function ProfilePage() {
-    const { data: session } = useSession();
+
+export default async function ProfilePage() {
+    const session = await getSession();
+
+    if (!session) {
+        redirect("/sign-in");
+    }
+
     return (
-        <ProfileContent session={session?.user} />
+        <ProfileContent session={session.user} />
     );
 }
