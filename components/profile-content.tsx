@@ -14,13 +14,21 @@ import PersonalInformation from "./profile-tabs/personal-information";
 import Security from "./profile-tabs/security";
 import Settings from "./profile-tabs/settings";
 
-type Props = {
-    userId: string;
-};
+type ProfileContentProps = {
+    session?: {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        email: string;
+        emailVerified: boolean;
+        name: string;
+        image?: string | null;
+    };
+}
 
 export default function ProfileContent({
-    userId,
-}: Props) {
+    session,
+}: ProfileContentProps) {
     return (
         <div className="min-h-screen bg-gray-100">
             <div className="container mx-auto p-6">
@@ -41,10 +49,6 @@ export default function ProfileContent({
                                 <h2 className="mt-4 font-semibold">
                                     User Profile
                                 </h2>
-
-                                <p className="text-sm text-gray-500">
-                                    ID: {userId}
-                                </p>
 
                             </div>
 
@@ -79,7 +83,11 @@ export default function ProfileContent({
 
                             <TabsContent value="personal">
                                 <PersonalInformation
-                                    userId={userId}
+                                    user={{
+                                        email: session?.email,
+                                        name: session?.name,
+                                        id: session?.id,
+                                    }}
                                 />
                             </TabsContent>
 

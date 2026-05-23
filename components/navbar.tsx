@@ -55,7 +55,7 @@ export default function Navbar() {
                                                     </p>
                                                 </div>
                                             </DropdownMenuLabel>
-                                            <Link href={`/profile/${session.user.id}`}>
+                                            <Link href={`/profile`}>
                                                 <DropdownMenuItem>
                                                     <User className="h-4 w-4" />
                                                     <span>Profile</span>
