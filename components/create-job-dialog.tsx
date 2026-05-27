@@ -16,6 +16,7 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { useState } from "react";
 import { createJobApplication } from "@/lib/actions/job-application";
+import { toast } from "sonner";
 
 interface CreateJobApplicationDialogProps {
     columnId: string;
@@ -54,10 +55,11 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                 setFormData(INITIAL_FORM_DATA);
                 setOpen(false);
             } else {
-                console.error("Failed to create job: ", result.error);
+                toast.error("Failed to create job application.");
             }
+            toast.success("Job application created successfully!");
         } catch (error) {
-            console.log("Error creating job application:", error);
+            toast.error("An error occurred while creating the job application.");
         }
     }
     return (

@@ -27,6 +27,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useState } from "react";
 import { useBoard } from "@/lib/hooks/useBoard";
 import { deleteColumn } from "@/lib/actions/column";
+import { toast } from "sonner";
 
 interface KanbanBoardProps {
     board: Board;
@@ -73,14 +74,20 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
     });
 
     async function handleDelete() {
+        if (sortedJobs.length > 0) {
+            toast.error("Cannot delete a column that still has job applications.");
+            return;
+        }
         try {
             const result = await deleteColumn(column._id);
 
             if (result.error) {
-                console.error("Failed to delete column:", result.error);
+                toast.error("Failed to delete column.");
+            } else {
+                toast.success("Column deleted successfully.");
             }
         } catch (err) {
-            console.error("Failed to delete column: ", err);
+            toast.error("An error occurred while deleting the column.");
         }
     }
 

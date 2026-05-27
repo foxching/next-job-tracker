@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { updateName } from "@/lib/actions/user";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 type Props = {
     user: {
         email?: string;
@@ -35,10 +36,9 @@ export default function PersonalInformation({ user }: Props) {
             await updateName(formData);
 
             router.refresh(); // re-fetches server props, updates user.name
-            alert("Name updated successfully!");
+            toast.success("Profile updated successfully!");
         } catch (error) {
-            console.error(error);
-            alert("Something went wrong.");
+            toast.error("Something went wrong.");
         } finally {
             setLoading(false);
         }

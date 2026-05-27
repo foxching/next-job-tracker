@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
+import { toast } from "sonner";
 
 interface JobApplicationCardProps {
     job: JobApplication;
@@ -45,9 +46,10 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
 
             if (!result.error) {
                 setIsEditing(false);
+                toast.success("Job application updated successfully!");
             }
         } catch (err) {
-            console.error("Failed to move job application: ", err);
+            toast.error("Failed to update job application.");
         }
     }
 
@@ -56,10 +58,11 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
             const result = await deleteJobApplication(job._id);
 
             if (result.error) {
-                console.error("Failed to delete job application:", result.error);
+                toast.error("Failed to delete job application.");
             }
+            toast.success("Job application deleted successfully!");
         } catch (err) {
-            console.error("Failed to move job application: ", err);
+            toast.error("An error occurred while deleting the job application.");
         }
     }
     async function handleMove(newColumnId: string) {
@@ -67,8 +70,9 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
             const result = await updateJobApplication(job._id, {
                 columnId: newColumnId,
             });
+            toast.success("Job application moved successfully!");
         } catch (err) {
-            console.error("Failed to move job application: ", err);
+            toast.error("An error occurred while moving the job application.");
         }
     }
     return (
