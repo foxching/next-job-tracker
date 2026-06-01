@@ -1,4 +1,5 @@
 import KanbanBoard from "@/components/kanban-board";
+import { DashboardSkeleton } from "@/components/skeleton/DashboardSkeleton";
 import { getSession } from "@/lib/auth/auth";
 import connectDB from "@/lib/db";
 import { Board } from "@/lib/models";
@@ -49,7 +50,7 @@ async function DashboardPage() {
 }
 export default async function Dashboard() {
     return (
-        <Suspense fallback={<p>Loading...</p>}>
+        <Suspense fallback={<DashboardSkeleton />}>
             <DashboardPage />
         </Suspense>
     );
