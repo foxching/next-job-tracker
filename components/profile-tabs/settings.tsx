@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useTheme } from "@/components/theme-provider";
 
 export default function Settings() {
     const [emailNotifications, setEmailNotifications] = useState(true);
-    const [darkMode, setDarkMode] = useState(false);
+    const { theme, toggleTheme } = useTheme();
+    const darkMode = theme === "dark";
 
     return (
         <>
@@ -33,7 +35,7 @@ export default function Settings() {
                     <span>Dark Mode</span>
 
                     <button
-                        onClick={() => setDarkMode(!darkMode)}
+                        onClick={toggleTheme}
                         className={`relative h-6 w-11 rounded-full transition-colors ${darkMode ? "bg-blue-600" : "bg-gray-300"
                             }`}
                     >

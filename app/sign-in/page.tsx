@@ -44,13 +44,13 @@ const SignIn = () => {
     }
 
     return (
-        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-white p-4">
-            <Card className="w-full max-w-md border-gray-200 shadow-lg">
+        <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-background p-4 text-foreground">
+            <Card className="w-full max-w-md border-border shadow-lg">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-black">
+                    <CardTitle className="text-2xl font-bold">
                         Sign In
                     </CardTitle>
-                    <CardDescription className="text-gray-600">
+                    <CardDescription className="text-muted-foreground">
                         Enter your credentials to access your account
                     </CardDescription>
                 </CardHeader>
@@ -62,7 +62,7 @@ const SignIn = () => {
                             </div>
                         )}
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-gray-700">
+                            <Label htmlFor="email" className="text-muted-foreground">
                                 Email
                             </Label>
                             <Input
@@ -76,7 +76,7 @@ const SignIn = () => {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-gray-700">
+                            <Label htmlFor="password" className="text-muted-foreground">
                                 Password
                             </Label>
                             <Input
@@ -94,7 +94,7 @@ const SignIn = () => {
                         <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
                             {loading ? "Signing in..." : "Sign in"}
                         </Button>
-                        <p className="text-center text-sm text-gray-600">
+                        <p className="text-center text-sm text-muted-foreground">
                             Don&apos;t have an account?{" "}
                             <Link href="/sign-up" className="font-medium text-primary hover:underline">
                                 Signup

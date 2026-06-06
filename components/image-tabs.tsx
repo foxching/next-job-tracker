@@ -8,7 +8,7 @@ export default function ImageTabs() {
     const [activeTab, setActiveTab] = useState("organize"); // organize, hired, boards
 
     return (
-        <section className="border-t bg-white py-16">
+        <section className="border-t border-border bg-background py-16">
             <div className="container mx-auto px-4">
                 <div className="mx-auto max-w-6xl">
                     {/* Tabs */}
@@ -16,8 +16,8 @@ export default function ImageTabs() {
                         <Button
                             onClick={() => setActiveTab("organize")}
                             className={`rounded-lg px-6 py-3 text-sm font-medium transition-colors ${activeTab === "organize"
-                                    ? "bg-primary text-white"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                ? "bg-primary text-white"
+                                : "bg-muted text-foreground hover:bg-muted/80"
                                 }`}
                         >
                             Organize Applications
@@ -25,8 +25,8 @@ export default function ImageTabs() {
                         <Button
                             onClick={() => setActiveTab("hired")}
                             className={`rounded-lg px-6 py-3 text-sm font-medium transition-colors ${activeTab === "hired"
-                                    ? "bg-primary text-white"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                ? "bg-primary text-white"
+                                : "bg-muted text-foreground hover:bg-muted/80"
                                 }`}
                         >
                             Get Hired
@@ -34,14 +34,14 @@ export default function ImageTabs() {
                         <Button
                             onClick={() => setActiveTab("boards")}
                             className={`rounded-lg px-6 py-3 text-sm font-medium transition-colors ${activeTab === "boards"
-                                    ? "bg-primary text-white"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                ? "bg-primary text-white"
+                                : "bg-muted text-foreground hover:bg-muted/80"
                                 }`}
                         >
                             Manage Boards
                         </Button>
                     </div>
-                    <div className="relative mx-auto max-w-5xl overflow-hidden rounded-lg border border-gray-200 shadow-xl">
+                    <div className="relative mx-auto max-w-5xl overflow-hidden rounded-lg border border-border shadow-xl">
                         {activeTab === "organize" && (
                             <Image
                                 src="/hero-images/hero1.png"

@@ -2,12 +2,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export const ProfileSkeleton = () => {
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-background text-foreground">
             <div className="container mx-auto p-6">
 
                 <div
                     defaultValue="personal"
-                    className="rounded-2xl bg-white p-6 shadow-md"
+                    className="rounded-2xl bg-card p-6 shadow-md"
                 >
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
 

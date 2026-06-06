@@ -6,25 +6,27 @@ import { Button } from "./ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import SignOutButton from "./sign-out-btn";
+import ThemeToggle from "./theme-toggle";
 import { useSession } from "@/lib/auth/auth-client";
 
 export default function Navbar() {
     const { data: session } = useSession();
     return (
-        <nav className="border-b border-gray-200 bg-white">
+        <nav className="border-b border-border bg-background">
             <div className="container mx-auto flex h-16 items-center px-4 justify-between">
                 <Link href="/" className="flex items-center text-xl font-semibold gap-2 text-primary">
                     <Briefcase />
                     Job Tracker
                 </Link>
                 <div className="flex items-center gap-4">
+                    <ThemeToggle />
                     {
                         session?.user ?
                             <>
                                 <Link href="/dashboard">
                                     <Button
                                         variant="ghost"
-                                        className="text-gray-700 hover:text-black"
+                                        className="text-foreground hover:text-foreground"
                                     >
                                         Dashboard
                                     </Button>
@@ -70,7 +72,7 @@ export default function Navbar() {
                             :
                             <>
                                 <Link href="/sign-in">
-                                    <Button variant="ghost" className="text-gray-700 hover:text-black">
+                                    <Button variant="ghost" className="text-foreground hover:text-foreground">
                                         Login
                                     </Button>
                                 </Link>

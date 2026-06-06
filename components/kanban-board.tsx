@@ -116,7 +116,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
                 </div>
             </CardHeader>
             <CardContent ref={setNodeRef}
-                className={`space-y-2 pt-4 bg-gray-50/50 min-h-[400px] rounded-b-lg ${isOver ? "ring-2 ring-blue-500" : ""
+                className={`space-y-2 pt-4 bg-muted/20 min-h-[400px] rounded-b-lg ${isOver ? "ring-2 ring-blue-500" : ""
                     }`}>
                 <SortableContext
                     items={sortedJobs.map((job) => job._id)}
