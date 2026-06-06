@@ -25,10 +25,7 @@ export default function PersonalInformation({ user }: Props) {
         try {
             setLoading(true);
 
-            const formData = new FormData();
-            formData.append("name", name);
-
-            await updateName(formData);
+            await updateName({ name });
 
             router.refresh(); // re-fetches server props, updates user.name
             toast.success("Profile updated successfully!");
