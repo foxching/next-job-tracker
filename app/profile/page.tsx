@@ -1,4 +1,5 @@
 import ProfileContent from "@/components/profile-content";
+import { ProfileSkeleton } from "@/components/skeleton/ProfileSkeleton";
 import { getSession } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
@@ -15,7 +16,7 @@ async function ProfileData() {
 
 export default function ProfilePage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<ProfileSkeleton />}>
             <ProfileData />
         </Suspense>
     );
