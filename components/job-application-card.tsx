@@ -44,11 +44,14 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                     .filter((tag) => tag.length > 0),
             });
 
-            if (!result.error) {
-                setIsEditing(false);
-                toast.success("Job application updated successfully!");
+            if (result.error) {
+                toast.error("Failed to update job application.");
+                return;
             }
-        } catch (err) {
+
+            setIsEditing(false);
+            toast.success("Job application updated successfully!");
+        } catch {
             toast.error("Failed to update job application.");
         }
     }
@@ -59,9 +62,11 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
 
             if (result.error) {
                 toast.error("Failed to delete job application.");
+                return;
             }
+
             toast.success("Job application deleted successfully!");
-        } catch (err) {
+        } catch {
             toast.error("An error occurred while deleting the job application.");
         }
     }
@@ -70,8 +75,14 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
             const result = await updateJobApplication(job._id, {
                 columnId: newColumnId,
             });
+
+            if (result.error) {
+                toast.error("Failed to move the job application.");
+                return;
+            }
+
             toast.success("Job application moved successfully!");
-        } catch (err) {
+        } catch {
             toast.error("An error occurred while moving the job application.");
         }
     }

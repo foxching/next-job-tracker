@@ -1,7 +1,7 @@
 "use client";
 
 import { Board, Column, JobApplication } from "@/lib/models/models.types";
-import { Award, Calendar, CheckCircle2, Mic, MoreHorizontal, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { Award, Calendar, CheckCircle2, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
@@ -31,7 +31,6 @@ import { toast } from "sonner";
 
 interface KanbanBoardProps {
     board: Board;
-    userId: string;
 }
 interface ColConfig {
     color: string;
@@ -86,7 +85,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
             } else {
                 toast.success("Column deleted successfully.");
             }
-        } catch (err) {
+        } catch {
             toast.error("An error occurred while deleting the column.");
         }
     }
@@ -166,7 +165,7 @@ function SortableJobCard({ job, columns }: { job: JobApplication, columns: Colum
     )
 }
 
-export default function KanbanBoard({ board, userId }: KanbanBoardProps) {
+export default function KanbanBoard({ board }: KanbanBoardProps) {
     const [activeId, setActiveId] = useState<string | null>(null);
     const { columns, moveJob } = useBoard(board);
     const sortedColumns = columns?.sort((a, b) => a.order - b.order) || [];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,11 +21,6 @@ export default function PersonalInformation({ user }: Props) {
     const [loading, setLoading] = useState(false);
     const router = useRouter();
 
-
-    useEffect(() => {
-        setName(user?.name || "");
-    }, [user?.name]);
-
     async function handleSubmit() {
         try {
             setLoading(true);
@@ -37,7 +32,7 @@ export default function PersonalInformation({ user }: Props) {
 
             router.refresh(); // re-fetches server props, updates user.name
             toast.success("Profile updated successfully!");
-        } catch (error) {
+        } catch {
             toast.error("Something went wrong.");
         } finally {
             setLoading(false);

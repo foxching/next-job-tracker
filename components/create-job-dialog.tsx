@@ -51,14 +51,15 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                     .filter((tag) => tag.length > 0),
             });
 
-            if (!result.error) {
-                setFormData(INITIAL_FORM_DATA);
-                setOpen(false);
-            } else {
+            if (result.error) {
                 toast.error("Failed to create job application.");
+                return;
             }
+
+            setFormData(INITIAL_FORM_DATA);
+            setOpen(false);
             toast.success("Job application created successfully!");
-        } catch (error) {
+        } catch {
             toast.error("An error occurred while creating the job application.");
         }
     }

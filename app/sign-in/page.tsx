@@ -36,7 +36,7 @@ const SignIn = () => {
             } else {
                 router.push("/dashboard");
             }
-        } catch (err) {
+        } catch {
             setError("An unexpected error occurred");
         } finally {
             setLoading(false);
@@ -95,7 +95,7 @@ const SignIn = () => {
                             {loading ? "Signing in..." : "Sign in"}
                         </Button>
                         <p className="text-center text-sm text-gray-600">
-                            Don't have an account?{" "}
+                            Don&apos;t have an account?{" "}
                             <Link href="/sign-up" className="font-medium text-primary hover:underline">
                                 Signup
                             </Link>
