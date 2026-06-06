@@ -1,13 +1,14 @@
-"use server";
-//import { auth } from "../auth";     // auth.ts is at lib/auth.ts ✅
-//import { auth } from "./auth";      // auth.ts is at lib/actions/auth.ts
-//import { auth } from "../../auth";  // auth.ts is at the project root
-import { auth } from "../auth/auth";  // auth.ts is at lib/auth/auth.ts ✅
+﻿"use server";
+
+import { auth } from "../auth/auth";
 import { headers } from "next/headers";
 
-export async function updateName(formData: FormData) {
-    const name = formData.get("name") as string;
+type UpdatePasswordInput = {
+    currentPassword: string;
+    newPassword: string;
+};
 
+export async function updateName({ name }: { name: string }) {
     if (!name) {
         throw new Error("Name is required");
     }
@@ -16,6 +17,29 @@ export async function updateName(formData: FormData) {
         headers: await headers(),
         body: {
             name,
+        },
+    });
+
+    return {
+        success: true,
+    };
+}
+
+export async function updatePassword({ currentPassword, newPassword }: UpdatePasswordInput) {
+    if (!currentPassword) {
+        throw new Error("Current password is required");
+    }
+
+    if (!newPassword) {
+        throw new Error("New password is required");
+    }
+
+    await auth.api.changePassword({
+        headers: await headers(),
+        body: {
+            currentPassword,
+            newPassword,
+            revokeOtherSessions: false,
         },
     });
 
