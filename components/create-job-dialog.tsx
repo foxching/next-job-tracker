@@ -74,15 +74,15 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                     Add Job
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl">
+            <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
                 <DialogHeader>
                     <DialogTitle>Add Job Application</DialogTitle>
                     <DialogDescription>
                         Fill in the details for the new job application.
                     </DialogDescription>
                 </DialogHeader>
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div className="space-y-4">
+                <form className="flex h-full min-h-0 flex-col " onSubmit={handleSubmit}>
+                    <div className="flex-1 overflow-y-auto min-h-0 pr-2">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="company">Company *</Label>
@@ -106,10 +106,8 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                                     }
                                 />
                             </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="location">Location </Label>
+                                <Label htmlFor="location">Location</Label>
                                 <Input
                                     id="location"
                                     value={formData.location}
@@ -129,29 +127,29 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                                     }
                                 />
                             </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="jobUrl">Job URL</Label>
-                            <Input
-                                id="jobUrl"
-                                type="url"
-                                placeholder="https://..."
-                                value={formData.jobUrl}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, jobUrl: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="tags">Tags (comma-separated)</Label>
-                            <Input
-                                id="tags"
-                                placeholder="React, Tailwind, High Pay"
-                                value={formData.tags}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, tags: e.target.value })
-                                }
-                            />
+                            <div className="space-y-2">
+                                <Label htmlFor="jobUrl">Job URL</Label>
+                                <Input
+                                    id="jobUrl"
+                                    type="url"
+                                    placeholder="https://..."
+                                    value={formData.jobUrl}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, jobUrl: e.target.value })
+                                    }
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="tags">Tags (comma-separated)</Label>
+                                <Input
+                                    id="tags"
+                                    placeholder="React, Tailwind, High Pay"
+                                    value={formData.tags}
+                                    onChange={(e) =>
+                                        setFormData({ ...formData, tags: e.target.value })
+                                    }
+                                />
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="description">Description</Label>
@@ -177,7 +175,7 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                             />
                         </div>
                     </div>
-                    <DialogFooter>
+                    <DialogFooter className="shrink-0 pt-4 border-t">
                         <Button
                             type="button"
                             variant="outline"

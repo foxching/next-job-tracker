@@ -120,4 +120,17 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .column-content::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .column-content::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .column-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 999px;
+  }
 }

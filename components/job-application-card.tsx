@@ -2,7 +2,7 @@
 
 import { Column, JobApplication } from "@/lib/models/models.types";
 import { Card, CardContent } from "./ui/card";
-import { Edit2, ExternalLink, MoreVertical, Trash2 } from "lucide-react";
+import { Edit2, ExternalLink, Eye, MoreVertical, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-application";
@@ -97,7 +97,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                             <p className="text-xs text-muted-foreground mb-1 truncate">
                                 {job.company}
                             </p>
-                            {job.description && (
+                            {/* {job.description && (
                                 <div className="mb-2">
                                     <p className="text-xs text-muted-foreground line-clamp-2 break-words">{job.description}</p>
                                     {job.description.length > 140 && (
@@ -106,7 +106,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                                         </button>
                                     )}
                                 </div>
-                            )}
+                            )} */}
                             {job.tags && job.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mb-1">
                                     {job.tags.map((tag, index) => (
@@ -138,6 +138,10 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => setIsDescOpen(true)}>
+                                        <Eye className="mr-2 h-4 w-4" />
+                                        View
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => setIsEditing(true)}>
                                         <Edit2 className="mr-2 h-4 w-4" />
                                         Edit
@@ -151,7 +155,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                                                         key={key}
                                                         onClick={() => handleMove(column._id)}
                                                     >
-                                                        Move to {column.name}
+                                                        {column.name}
                                                     </DropdownMenuItem>
                                                 ))}
                                         </>
@@ -168,7 +172,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                         </div>
                     </div>
                 </CardContent>
-            </Card>
+            </Card >
             <Dialog open={isDescOpen} onOpenChange={setIsDescOpen}>
                 <DialogContent className="max-w-xl">
                     <DialogHeader>
@@ -191,13 +195,13 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                 </DialogContent>
             </Dialog>
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="max-w-3xl max-h-[calc(100vh-4rem)] overflow-hidden">
                     <DialogHeader>
                         <DialogTitle>Add Job Application</DialogTitle>
                         <DialogDescription>Track a new job application</DialogDescription>
                     </DialogHeader>
-                    <form className="space-y-4" onSubmit={handleUpdate}>
-                        <div className="space-y-4">
+                    <form className="flex h-full min-h-0 flex-col" onSubmit={handleUpdate}>
+                        <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="company">Company *</Label>
