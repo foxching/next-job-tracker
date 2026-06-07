@@ -21,6 +21,7 @@ interface JobApplicationCardProps {
 
 export default function JobApplicationCard({ job, columns, dragHandleProps, }: JobApplicationCardProps) {
     const [isEditing, setIsEditing] = useState(false);
+    const [isDescOpen, setIsDescOpen] = useState(false);
     const [formData, setFormData] = useState({
         company: job.company,
         position: job.position,
@@ -88,21 +89,26 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
     }
     return (
         <>
-            <Card className="cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm"  {...dragHandleProps}>
-                <CardContent className="p-4">
+            <Card className="w-full max-w-[320px] mx-auto cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm"  {...dragHandleProps}>
+                <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm mb-1">{job.position}</h3>
-                            <p className="text-xs text-muted-foreground mb-2">
+                            <h3 className="font-semibold text-sm mb-0.5 truncate">{job.position}</h3>
+                            <p className="text-xs text-muted-foreground mb-1 truncate">
                                 {job.company}
                             </p>
                             {job.description && (
-                                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                                    {job.description}
-                                </p>
+                                <div className="mb-2">
+                                    <p className="text-xs text-muted-foreground line-clamp-2 break-words">{job.description}</p>
+                                    {job.description.length > 140 && (
+                                        <button type="button" onClick={() => setIsDescOpen(true)} className="text-xs text-primary mt-1 inline-block">
+                                            See more
+                                        </button>
+                                    )}
+                                </div>
                             )}
                             {job.tags && job.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-2">
+                                <div className="flex flex-wrap gap-1 mb-1">
                                     {job.tags.map((tag, index) => (
                                         <span
                                             key={index}
@@ -163,6 +169,27 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                     </div>
                 </CardContent>
             </Card>
+            <Dialog open={isDescOpen} onOpenChange={setIsDescOpen}>
+                <DialogContent className="max-w-xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-lg font-semibold">{job.position}</DialogTitle>
+                        <DialogDescription className="text-sm text-muted-foreground">{job.company}</DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4">
+                        <p className="text-sm text-foreground whitespace-pre-wrap">{job.description}</p>
+                        {job.tags && job.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-4">
+                                {job.tags.map((tag, i) => (
+                                    <span key={i} className="px-2 py-1 text-sm rounded-full bg-blue-100 text-blue-700">{tag}</span>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsDescOpen(false)}>Close</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>

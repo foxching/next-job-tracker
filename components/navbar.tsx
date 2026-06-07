@@ -13,7 +13,7 @@ export default function Navbar() {
     const { data: session } = useSession();
     return (
         <nav className="border-b border-border bg-background">
-            <div className="container mx-auto flex h-16 items-center px-4 justify-between">
+            <div className="w-full px-6 flex h-16 items-center justify-between max-w-full mx-auto">
                 <Link href="/" className="flex items-center text-xl font-semibold gap-2 text-primary">
                     <Briefcase />
                     Job Tracker

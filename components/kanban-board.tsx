@@ -93,8 +93,8 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
 
 
     return (
-        <Card className="min-w-[300px] flex-shrink-0 shadow-md p-0">
-            <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3`}>
+        <Card className="min-w-[280px] flex-shrink-0 shadow-md p-0 flex flex-col h-full">
+            <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3 relative`}>
                 <div className=" flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         {config.icon}
@@ -115,24 +115,25 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
                     </DropdownMenu>
                 </div>
             </CardHeader>
-            <CardContent ref={setNodeRef}
-                className={`space-y-2 pt-4 bg-muted/20 min-h-[400px] rounded-b-lg ${isOver ? "ring-2 ring-blue-500" : ""
-                    }`}>
-                <SortableContext
-                    items={sortedJobs.map((job) => job._id)}
-                    strategy={verticalListSortingStrategy}
-                >
-                    {sortedJobs.map((job, key) => (
-                        <SortableJobCard
-                            key={key}
-                            job={{ ...job, columnId: job.columnId || column._id }}
-                            columns={sortedColumns}
-                        />
-                    ))}
-                </SortableContext>
-
-                <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
-            </CardContent>
+            <div className={`flex-1 flex flex-col min-h-0 bg-muted/20 rounded-b-lg overflow-hidden ${isOver ? "ring-2 ring-blue-500" : ""}`}>
+                <CardContent ref={setNodeRef} className="flex-1 overflow-y-auto space-y-2 pt-4">
+                    <SortableContext
+                        items={sortedJobs.map((job) => job._id)}
+                        strategy={verticalListSortingStrategy}
+                    >
+                        {sortedJobs.map((job, key) => (
+                            <SortableJobCard
+                                key={key}
+                                job={{ ...job, columnId: job.columnId || column._id }}
+                                columns={sortedColumns}
+                            />
+                        ))}
+                    </SortableContext>
+                </CardContent>
+                <div className="border-t border-border p-2 bg-muted/10">
+                    <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
+                </div>
+            </div>
         </Card >
     );
 }
@@ -286,8 +287,8 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="space-y-4">
-                <div className="flex gap-4 overflow-x-auto pb-4">
+            <div className="space-y-4 w-full h-full">
+                <div className="flex gap-4 overflow-x-auto pb-4 w-full items-start h-full">
                     {sortedColumns.map((col, key) => {
                         const config = COLUMN_CONFIG[key] || { color: "bg-gray-500", icon: <Calendar className="h-4 w-4" /> };
                         return (
