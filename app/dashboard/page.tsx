@@ -7,6 +7,7 @@ import {
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import EditableBoardTitle from "@/components/editable-board-title";
 import { ChevronDown, Plus, Settings } from "lucide-react";
 import { getSession } from "@/lib/auth/auth";
 import connectDB from "@/lib/db";
@@ -15,13 +16,10 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 async function getBoard(userId: string) {
-    "use cache";
-
     await connectDB();
 
     const boardDoc = await Board.findOne({
         userId: userId,
-        name: "Job Hunt",
     }).populate({
         path: "columns",
         populate: {
@@ -49,7 +47,7 @@ async function DashboardPage() {
             <div className="flex h-full flex-col w-full px-6 py-6">
                 <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold">{board?.name}</h1>
+                        {board && <EditableBoardTitle boardId={board._id} initialName={board.name} />}
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <DropdownMenu>
@@ -81,7 +79,7 @@ async function DashboardPage() {
                     </div>
                 </div>
                 <div className="flex-1 overflow-hidden">
-                    <KanbanBoard board={board} />
+                    {board ? <KanbanBoard board={board} /> : <div className="flex items-center justify-center h-full text-muted-foreground">No board found</div>}
                 </div>
             </div>
         </div>
