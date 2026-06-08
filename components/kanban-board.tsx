@@ -115,8 +115,8 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
                     </DropdownMenu>
                 </div>
             </CardHeader>
-            <div className={`flex-1 flex flex-col min-h-0 bg-muted/20 rounded-b-lg overflow-hidden ${isOver ? "ring-2 ring-blue-500" : ""}`}>
-                <CardContent ref={setNodeRef} className="flex-1 overflow-y-auto space-y-2 pt-4">
+            <div className={`flex-1 flex flex-col gap-2 min-h-0 bg-muted/20 rounded-b-lg overflow-hidden ${isOver ? "ring-2 ring-blue-500" : ""}`}>
+                <CardContent ref={setNodeRef} className="flex-1 overflow-y-auto space-y-2 pt-2 pb-2">
                     <SortableContext
                         items={sortedJobs.map((job) => job._id)}
                         strategy={verticalListSortingStrategy}
@@ -288,7 +288,7 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
             onDragEnd={handleDragEnd}
         >
             <div className="space-y-4 w-full h-full">
-                <div className="flex gap-4 overflow-x-auto pb-4 w-full items-start h-full">
+                <div className="flex gap-4 overflow-x-auto pb-4 p-2 w-full items-start h-full">
                     {sortedColumns.map((col, key) => {
                         const config = COLUMN_CONFIG[key] || { color: "bg-gray-500", icon: <Calendar className="h-4 w-4" /> };
                         return (

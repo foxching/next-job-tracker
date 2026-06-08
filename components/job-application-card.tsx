@@ -97,38 +97,19 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                             <p className="text-xs text-muted-foreground mb-1 truncate">
                                 {job.company}
                             </p>
-                            {/* {job.description && (
-                                <div className="mb-2">
-                                    <p className="text-xs text-muted-foreground line-clamp-2 break-words">{job.description}</p>
-                                    {job.description.length > 140 && (
-                                        <button type="button" onClick={() => setIsDescOpen(true)} className="text-xs text-primary mt-1 inline-block">
-                                            See more
-                                        </button>
-                                    )}
-                                </div>
-                            )} */}
-                            {job.tags && job.tags.length > 0 && (
-                                <div className="flex flex-wrap gap-1 mb-1">
-                                    {job.tags.map((tag, index) => (
-                                        <span
-                                            key={index}
-                                            className="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-                                        >
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            )}
-                            {job.jobUrl && (
-                                <a
-                                    href={job.jobUrl}
-                                    target="_blank"
-                                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <ExternalLink className="h-3 w-3" />
-                                </a>
-                            )}
+                            <small className="text-xs font-bold text-foreground">{job.salary}</small>
+                            <div>
+                                {job.jobUrl && (
+                                    <a
+                                        href={job.jobUrl}
+                                        target="_blank"
+                                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                )}
+                            </div>
                         </div>
                         <div className="flex items-start gap-1">
                             <DropdownMenu>
@@ -195,13 +176,13 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                 </DialogContent>
             </Dialog>
             <Dialog open={isEditing} onOpenChange={setIsEditing}>
-                <DialogContent className="max-w-3xl max-h-[calc(100vh-4rem)] overflow-hidden">
+                <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
                     <DialogHeader>
-                        <DialogTitle>Add Job Application</DialogTitle>
-                        <DialogDescription>Track a new job application</DialogDescription>
+                        <DialogTitle>Edit Job Application</DialogTitle>
+                        <DialogDescription>Update your job application details</DialogDescription>
                     </DialogHeader>
-                    <form className="flex h-full min-h-0 flex-col" onSubmit={handleUpdate}>
-                        <div className="min-h-0 space-y-4 overflow-y-auto pr-1">
+                    <form className="flex h-full min-h-0 flex-col " onSubmit={handleUpdate}>
+                        <div className="flex-1 overflow-y-auto min-h-0 pr-2">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="company">Company *</Label>

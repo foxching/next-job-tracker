@@ -50,7 +50,6 @@ async function DashboardPage() {
                 <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div>
                         <h1 className="text-3xl font-bold">{board?.name}</h1>
-                        <p className="text-muted-foreground">Track your job applications</p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <DropdownMenu>
