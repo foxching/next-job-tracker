@@ -4,6 +4,8 @@ export interface IColumn extends Document {
     name: string;
     boardId: mongoose.Types.ObjectId;
     order: number;
+    icon: string;
+    color: string;
     jobApplications: mongoose.Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
@@ -28,6 +30,16 @@ const ColumnSchema = new Schema<IColumn>(
             required: true,
             default: 0,
         },
+        icon: {
+            type: String,
+            required: true,
+            default: "Calendar",
+        },
+        color: {
+            type: String,
+            required: true,
+            default: "bg-cyan-500",
+        },
         jobApplications: [
             {
                 type: Schema.Types.ObjectId,
@@ -40,5 +52,13 @@ const ColumnSchema = new Schema<IColumn>(
     }
 );
 
-export default mongoose.models.Column ||
-    mongoose.model<IColumn>("Column", ColumnSchema);
+const ColumnModel = mongoose.models.Column as mongoose.Model<IColumn> | undefined;
+
+const Column =
+    ColumnModel &&
+        ColumnModel.schema.path("icon") &&
+        ColumnModel.schema.path("color")
+        ? ColumnModel
+        : mongoose.model<IColumn>("Column", ColumnSchema);
+
+export default Column;

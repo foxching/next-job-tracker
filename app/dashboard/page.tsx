@@ -1,14 +1,9 @@
 import KanbanBoard from "@/components/kanban-board";
 import { DashboardSkeleton } from "@/components/skeleton/DashboardSkeleton";
 import { Button } from "@/components/ui/button";
-import {
-    DropdownMenu,
-    DropdownMenuTrigger,
-    DropdownMenuContent,
-    DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import EditableBoardTitle from "@/components/editable-board-title";
-import { ChevronDown, Plus, Settings } from "lucide-react";
+import BoardMenu from "@/components/board-menu";
+import { Plus } from "lucide-react";
 import { getSession } from "@/lib/auth/auth";
 import connectDB from "@/lib/db";
 import { Board } from "@/lib/models";
@@ -50,28 +45,7 @@ async function DashboardPage() {
                         {board && <EditableBoardTitle boardId={board._id} initialName={board.name} />}
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="inline-flex items-center gap-2">
-                                    <Settings className="h-4 w-4" />
-                                    Board menu
-                                    <ChevronDown className="h-4 w-4" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Add column
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    <Settings className="mr-2 h-4 w-4" />
-                                    Board settings
-                                </DropdownMenuItem>
-                                <DropdownMenuItem>
-                                    Export board
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <BoardMenu boardId={board._id} />
                         <Button>
                             <Plus className="mr-2 h-4 w-4" />
                             New application

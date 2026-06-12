@@ -17,6 +17,8 @@ export interface Column {
     _id: string;
     name: string;
     order: number;
+    icon?: string;
+    color?: string;
     jobApplications: JobApplication[];
 }
 

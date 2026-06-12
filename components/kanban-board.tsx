@@ -37,28 +37,18 @@ interface ColConfig {
     icon: React.ReactNode;
 }
 
-const COLUMN_CONFIG: Array<ColConfig> = [
-    {
-        color: "bg-cyan-500",
-        icon: <Calendar className="h-4 w-4" />,
-    },
-    {
-        color: "bg-purple-500",
-        icon: <CheckCircle2 className="h-4 w-4" />,
-    },
-    {
-        color: "bg-green-500",
-        icon: <Mic className="h-4 w-4" />,
-    },
-    {
-        color: "bg-yellow-500",
-        icon: <Award className="h-4 w-4" />,
-    },
-    {
-        color: "bg-red-500",
-        icon: <XCircle className="h-4 w-4" />,
-    },
-];
+const ICON_MAP: Record<string, React.ReactNode> = {
+    Calendar: <Calendar className="h-4 w-4" />,
+    CheckCircle2: <CheckCircle2 className="h-4 w-4" />,
+    Mic: <Mic className="h-4 w-4" />,
+    Award: <Award className="h-4 w-4" />,
+    XCircle: <XCircle className="h-4 w-4" />,
+};
+
+const DEFAULT_COLUMN_CONFIG: ColConfig = {
+    color: "bg-cyan-500",
+    icon: <Calendar className="h-4 w-4" />,
+};
 
 function DroppableColumn({ column, config, boardId, sortedColumns }: { column: Column, config: ColConfig, boardId: string, sortedColumns: Column[] }) {
     const sortedJobs =
@@ -290,7 +280,10 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
             <div className="space-y-4 w-full h-full">
                 <div className="flex gap-4 overflow-x-auto pb-4 p-2 w-full items-start h-full">
                     {sortedColumns.map((col, key) => {
-                        const config = COLUMN_CONFIG[key] || { color: "bg-gray-500", icon: <Calendar className="h-4 w-4" /> };
+                        const config: ColConfig = {
+                            color: col.color || DEFAULT_COLUMN_CONFIG.color,
+                            icon: ICON_MAP[col.icon || "Calendar"] || DEFAULT_COLUMN_CONFIG.icon,
+                        };
                         return (
                             <DroppableColumn key={key} column={col} config={config} boardId={board._id} sortedColumns={sortedColumns} />
                         )
