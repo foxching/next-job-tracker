@@ -164,7 +164,7 @@ async function seed() {
         console.log("✅ Connected to database");
 
         // Find the user's board
-        let board = await Board.findOne({ userId: USER_ID, name: "Job Hunt" });
+        let board = await Board.findOne({ userId: USER_ID });
 
         if (!board) {
             console.log("⚠️  Board not found. Creating board...");

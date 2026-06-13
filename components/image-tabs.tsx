@@ -3,9 +3,13 @@
 import { Button } from "./ui/button";
 import Image from "next/image";
 import { useState } from "react";
+import { useTheme } from "./theme-provider";
 
 export default function ImageTabs() {
     const [activeTab, setActiveTab] = useState("organize"); // organize, hired, boards
+    const { theme, toggleTheme } = useTheme();
+    const isDark = theme === "dark";
+    console.log("isDark", isDark);
 
     return (
         <section className="border-t border-border bg-background py-16">
@@ -44,7 +48,7 @@ export default function ImageTabs() {
                     <div className="relative mx-auto max-w-5xl overflow-hidden rounded-lg border border-border shadow-xl">
                         {activeTab === "organize" && (
                             <Image
-                                src="/hero-images/hero1.png"
+                                src={isDark ? "/hero-images/hero1-dark.png" : "/hero-images/hero1-light.png"}
                                 alt="Organize Applications"
                                 width={1200}
                                 height={800}
@@ -53,7 +57,7 @@ export default function ImageTabs() {
 
                         {activeTab === "hired" && (
                             <Image
-                                src="/hero-images/hero2.png"
+                                src={isDark ? "/hero-images/hero2-dark.png" : "/hero-images/hero2-light.png"}
                                 alt="Organize Applications"
                                 width={1200}
                                 height={800}
@@ -62,7 +66,7 @@ export default function ImageTabs() {
 
                         {activeTab === "boards" && (
                             <Image
-                                src="/hero-images/hero3.png"
+                                src={isDark ? "/hero-images/hero3-dark.png" : "/hero-images/hero3-light.png"}
                                 alt="Organize Applications"
                                 width={1200}
                                 height={800}
