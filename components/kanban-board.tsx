@@ -292,18 +292,41 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
             onDragEnd={handleDragEnd}
         >
             <div className="space-y-4 w-full h-full">
-                <div className="flex gap-4 overflow-x-auto pb-4 p-2 w-full items-start h-full">
-                    {sortedColumns.map((col) => {
-                        const config: ColConfig = {
-                            color: col.color || DEFAULT_COLUMN_CONFIG.color,
-                            icon: ICON_MAP[col.icon || "Calendar"] || DEFAULT_COLUMN_CONFIG.icon,
-                        };
-                        return (
-                            <DroppableColumn key={col._id} column={col} config={config} boardId={board._id} sortedColumns={sortedColumns} />
-                        )
-                    })}
-                </div>
+                {sortedColumns.length > 0 ? (
+                    <div className="flex gap-4 overflow-x-auto pb-4 p-2 w-full items-start h-full">
+                        {sortedColumns.map((col) => {
+                            const config: ColConfig = {
+                                color: col.color || DEFAULT_COLUMN_CONFIG.color,
+                                icon:
+                                    ICON_MAP[col.icon || "Calendar"] ||
+                                    DEFAULT_COLUMN_CONFIG.icon,
+                            };
+
+                            return (
+                                <DroppableColumn
+                                    key={col._id}
+                                    column={col}
+                                    config={config}
+                                    boardId={board._id}
+                                    sortedColumns={sortedColumns}
+                                />
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="flex items-center justify-center h-full py-20 text-center">
+                        <div>
+                            <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                                No columns found
+                            </h2>
+                            <p className="mt-2 text-sm text-gray-500">
+                                Create your first column to start organizing your job applications.
+                            </p>
+                        </div>
+                    </div>
+                )}
             </div>
+
             <DragOverlay>
                 {activeJob ? (
                     <div className="opacity-50">
