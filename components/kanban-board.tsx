@@ -1,11 +1,12 @@
 "use client";
 
 import { Board, Column, JobApplication } from "@/lib/models/models.types";
-import { Award, Calendar, CheckCircle2, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { Award, Calendar, CheckCircle2, Edit2, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import CreateJobApplicationDialog from "./create-job-dialog";
+import CreateColumnDialog from "./create-column-dialog";
 import JobApplicationCard from "./job-application-card";
 import {
     closestCorners,
@@ -51,6 +52,7 @@ const DEFAULT_COLUMN_CONFIG: ColConfig = {
 };
 
 function DroppableColumn({ column, config, boardId, sortedColumns }: { column: Column, config: ColConfig, boardId: string, sortedColumns: Column[] }) {
+    const [showEditColumnDialog, setShowEditColumnDialog] = useState(false);
     const sortedJobs =
         column.jobApplications?.sort((a, b) => a.order - b.order) || [];
 
@@ -101,6 +103,10 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => setShowEditColumnDialog(true)}>
+                                <Edit2 className="mr-2 h-4 w-4" />
+                                Edit
+                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -111,9 +117,9 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
                         items={sortedJobs.map((job) => job._id)}
                         strategy={verticalListSortingStrategy}
                     >
-                        {sortedJobs.map((job, key) => (
+                        {sortedJobs.map((job) => (
                             <SortableJobCard
-                                key={key}
+                                key={job._id}
                                 job={{ ...job, columnId: job.columnId || column._id }}
                                 columns={sortedColumns}
                             />
@@ -124,7 +130,15 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
                     <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
                 </div>
             </div>
-        </Card >
+            {showEditColumnDialog && (
+                <CreateColumnDialog
+                    boardId={boardId}
+                    open={showEditColumnDialog}
+                    onOpenChange={setShowEditColumnDialog}
+                    column={column}
+                />
+            )}
+        </Card>
     );
 }
 
@@ -279,13 +293,13 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
         >
             <div className="space-y-4 w-full h-full">
                 <div className="flex gap-4 overflow-x-auto pb-4 p-2 w-full items-start h-full">
-                    {sortedColumns.map((col, key) => {
+                    {sortedColumns.map((col) => {
                         const config: ColConfig = {
                             color: col.color || DEFAULT_COLUMN_CONFIG.color,
                             icon: ICON_MAP[col.icon || "Calendar"] || DEFAULT_COLUMN_CONFIG.icon,
                         };
                         return (
-                            <DroppableColumn key={key} column={col} config={config} boardId={board._id} sortedColumns={sortedColumns} />
+                            <DroppableColumn key={col._id} column={col} config={config} boardId={board._id} sortedColumns={sortedColumns} />
                         )
                     })}
                 </div>

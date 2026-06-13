@@ -13,12 +13,12 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createColumn } from "@/lib/actions/column";
+import { createColumn, updateColumn } from "@/lib/actions/column";
+import { Column } from "@/lib/models/models.types";
 import { toast } from "sonner";
 import {
     Award,
     Calendar,
-    Check,
     CheckCircle2,
     Mic,
     XCircle,
@@ -44,15 +44,23 @@ interface CreateColumnDialogProps {
     boardId: string;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
+    column?: Column;
 }
 
-export default function CreateColumnDialog({ boardId, open: controlledOpen, onOpenChange }: CreateColumnDialogProps) {
+export default function CreateColumnDialog({
+    boardId,
+    open: controlledOpen,
+    onOpenChange,
+    column,
+}: CreateColumnDialogProps) {
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
-    const [name, setName] = useState("");
-    const [icon, setIcon] = useState("Calendar");
-    const [color, setColor] = useState("bg-cyan-500");
+    const [name, setName] = useState(column ? column.name : "");
+    const [icon, setIcon] = useState(column ? column.icon || "Calendar" : "Calendar");
+    const [color, setColor] = useState(column ? column.color || "bg-cyan-500" : "bg-cyan-500");
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+
+    const isEditMode = Boolean(column);
 
     // Use controlled state if provided, otherwise use uncontrolled state
     const isOpen = controlledOpen !== undefined ? controlledOpen : uncontrolledOpen;
@@ -62,12 +70,24 @@ export default function CreateColumnDialog({ boardId, open: controlledOpen, onOp
         } else {
             setUncontrolledOpen(newOpen);
         }
-        // Reset form when closing
-        if (!newOpen) {
-            setName("");
-            setIcon("Calendar");
-            setColor("bg-cyan-500");
+
+        if (newOpen) {
+            if (column) {
+                setName(column.name);
+                setIcon(column.icon || "Calendar");
+                setColor(column.color || "bg-cyan-500");
+            } else {
+                setName("");
+                setIcon("Calendar");
+                setColor("bg-cyan-500");
+            }
+            return;
         }
+
+        // Reset form when closing
+        setName("");
+        setIcon("Calendar");
+        setColor("bg-cyan-500");
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -80,7 +100,9 @@ export default function CreateColumnDialog({ boardId, open: controlledOpen, onOp
 
         setIsLoading(true);
         try {
-            const result = await createColumn(boardId, name.trim(), icon, color);
+            const result = isEditMode
+                ? await updateColumn(column!._id, name.trim(), icon, color)
+                : await createColumn(boardId, name.trim(), icon, color);
 
             if (result.error) {
                 toast.error(result.error);
@@ -89,9 +111,13 @@ export default function CreateColumnDialog({ boardId, open: controlledOpen, onOp
 
             handleOpenChange(false);
             router.refresh();
-            toast.success("Column created successfully!");
+            toast.success(isEditMode ? "Column updated successfully!" : "Column created successfully!");
         } catch (error) {
-            toast.error("An error occurred while creating the column.");
+            toast.error(
+                isEditMode
+                    ? "An error occurred while updating the column."
+                    : "An error occurred while creating the column."
+            );
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -102,9 +128,11 @@ export default function CreateColumnDialog({ boardId, open: controlledOpen, onOp
         <Dialog open={isOpen} onOpenChange={handleOpenChange}>
             <DialogContent className="max-w-sm">
                 <DialogHeader>
-                    <DialogTitle>Add New Column</DialogTitle>
+                    <DialogTitle>{isEditMode ? "Edit Column" : "Add New Column"}</DialogTitle>
                     <DialogDescription>
-                        Create a new column for your board to organize job applications.
+                        {isEditMode
+                            ? "Update the column details for your board."
+                            : "Create a new column for your board to organize job applications."}
                     </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -172,7 +200,13 @@ export default function CreateColumnDialog({ boardId, open: controlledOpen, onOp
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isLoading}>
-                            {isLoading ? "Creating..." : "Create Column"}
+                            {isLoading
+                                ? isEditMode
+                                    ? "Saving..."
+                                    : "Creating..."
+                                : isEditMode
+                                    ? "Save Changes"
+                                    : "Create Column"}
                         </Button>
                     </DialogFooter>
                 </form>

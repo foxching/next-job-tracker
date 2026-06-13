@@ -42,11 +42,13 @@ export default function BoardMenu({ boardId }: BoardMenuProps) {
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
-            <CreateColumnDialog
-                boardId={boardId}
-                open={showAddColumnDialog}
-                onOpenChange={setShowAddColumnDialog}
-            />
+            {showAddColumnDialog && (
+                <CreateColumnDialog
+                    boardId={boardId}
+                    open={showAddColumnDialog}
+                    onOpenChange={setShowAddColumnDialog}
+                />
+            )}
         </>
     );
 }

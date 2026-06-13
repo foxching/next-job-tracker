@@ -49,6 +49,45 @@ export async function createColumn(boardId: string, name: string, icon: string, 
     return { success: true };
 }
 
+export async function updateColumn(columnId: string, name: string, icon: string, color: string) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { error: "Unauthorized" };
+    }
+
+    if (!name || name.trim() === "") {
+        return { error: "Column name cannot be empty" };
+    }
+
+    await connectDB();
+
+    const column = await Column.findById(columnId);
+
+    if (!column) {
+        return { error: "Column not found" };
+    }
+
+    const board = await Board.findOne({
+        _id: column.boardId,
+        userId: session.user.id,
+    });
+
+    if (!board) {
+        return { error: "Unauthorized" };
+    }
+
+    await Column.findByIdAndUpdate(columnId, {
+        name: name.trim(),
+        icon,
+        color,
+    });
+
+    revalidatePath("/dashboard");
+
+    return { success: true };
+}
+
 export async function deleteColumn(columnId: string) {
     const session = await getSession();
 
