@@ -2,8 +2,8 @@
 
 import { Column, JobApplication } from "@/lib/models/models.types";
 import { Card, CardContent } from "./ui/card";
-import { Edit2, ExternalLink, Eye, MoreVertical, Trash2 } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
+import { Award, Calendar, CheckCircle2, Edit2, ExternalLink, Eye, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-application";
 import { useState } from "react";
@@ -87,6 +87,15 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
             toast.error("An error occurred while moving the job application.");
         }
     }
+
+    const ICON_MAP: Record<string, React.ReactNode> = {
+        Calendar: <Calendar className="h-4 w-4" />,
+        CheckCircle2: <CheckCircle2 className="h-4 w-4" />,
+        Mic: <Mic className="h-4 w-4" />,
+        Award: <Award className="h-4 w-4" />,
+        XCircle: <XCircle className="h-4 w-4" />,
+    };
+
     return (
         <>
             <Card className="w-full max-w-[320px] mx-auto cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm"  {...dragHandleProps}>
@@ -119,6 +128,27 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
+                                    <DropdownMenuGroup>
+                                        <DropdownMenuLabel>Move to</DropdownMenuLabel>
+                                        {columns.length > 1 && (
+                                            <>
+                                                {columns
+                                                    .filter((c) => c._id !== job.columnId)
+                                                    .map((column, key) => (
+                                                        <DropdownMenuItem
+                                                            key={key}
+                                                            onClick={() => handleMove(column._id)}
+                                                        >
+                                                            <div className="mr-2">
+                                                                {ICON_MAP[column.icon as string] ?? null}
+                                                            </div>
+                                                            {column.name}
+                                                        </DropdownMenuItem>
+                                                    ))}
+                                            </>
+                                        )}
+                                    </DropdownMenuGroup>
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={() => setIsDescOpen(true)}>
                                         <Eye className="mr-2 h-4 w-4" />
                                         View
@@ -127,20 +157,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                                         <Edit2 className="mr-2 h-4 w-4" />
                                         Edit
                                     </DropdownMenuItem>
-                                    {columns.length > 1 && (
-                                        <>
-                                            {columns
-                                                .filter((c) => c._id !== job.columnId)
-                                                .map((column, key) => (
-                                                    <DropdownMenuItem
-                                                        key={key}
-                                                        onClick={() => handleMove(column._id)}
-                                                    >
-                                                        {column.name}
-                                                    </DropdownMenuItem>
-                                                ))}
-                                        </>
-                                    )}
+
                                     <DropdownMenuItem
                                         className="text-destructive"
                                         onClick={() => handleDelete()}
@@ -155,18 +172,36 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                 </CardContent>
             </Card >
             <Dialog open={isDescOpen} onOpenChange={setIsDescOpen}>
-                <DialogContent className="max-w-xl">
+                <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle className="text-lg font-semibold">{job.position}</DialogTitle>
-                        <DialogDescription className="text-sm text-muted-foreground">{job.company}</DialogDescription>
+                        <DialogDescription className="text-sm text-muted-foreground">
+                            <p>{job.company}</p>
+                            <p>{job.location}</p>
+                            <p className="text-black-10">{job.salary}</p>
+                        </DialogDescription>
                     </DialogHeader>
-                    <div className="mt-4">
-                        <p className="text-sm text-foreground whitespace-pre-wrap">{job.description}</p>
+                    <div>
+                        {job.description && (
+                            <div className="mt-4">
+                                <small className="text-sm text-muted-foreground">Job Description</small>
+                                <p className="text-sm text-foreground whitespace-pre-wrap">{job.description}</p>
+                            </div>
+                        )}
+                        {job.notes && (
+                            <div className="mt-4">
+                                <small className="text-sm text-muted-foreground">Job Notes</small>
+                                <p className="text-sm text-foreground whitespace-pre-wrap">{job.notes}</p>
+                            </div>
+                        )}
                         {job.tags && job.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-4">
-                                {job.tags.map((tag, i) => (
-                                    <span key={i} className="px-2 py-1 text-sm rounded-full bg-blue-100 text-blue-700">{tag}</span>
-                                ))}
+                            <div className="mt-4">
+                                <small className="text-sm text-muted-foreground">Tags</small>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {job.tags.map((tag, i) => (
+                                        <span key={i} className="px-2 py-1 text-sm rounded-full bg-blue-100 text-blue-700">{tag}</span>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
