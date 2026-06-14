@@ -16,6 +16,7 @@ async function getBoard(userId: string) {
 
     const boardDoc = await Board.findOne({
         userId: userId,
+        isActive: true,
     }).populate({
         path: "columns",
         populate: {
@@ -30,10 +31,27 @@ async function getBoard(userId: string) {
     return board;
 }
 
+async function getBoards(userId: string) {
+    await connectDB();
+
+    const boardDocs = await Board.find({
+        userId,
+    })
+        .sort({ createdAt: 1 })
+        .lean();
+
+    return boardDocs.map((board) => ({
+        _id: board._id.toString(),
+        name: board.name,
+        columns: [], // We don't need columns for the board switcher
+        isActive: board.isActive,
+    }));
+}
+
 async function DashboardPage() {
     const session = await getSession();
     const board = await getBoard(session?.user.id ?? "");
-
+    const boards = await getBoards(session?.user.id ?? "");
     if (!session?.user) {
         redirect("/sign-in");
     }
@@ -44,7 +62,7 @@ async function DashboardPage() {
                 <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
                     <div className="flex items-center gap-4">
                         {board && <EditableBoardTitle boardId={board._id} initialName={board.name} />}
-                        <BoardSwitcher />
+                        <BoardSwitcher boards={boards} />
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <BoardMenu boardId={board._id} />

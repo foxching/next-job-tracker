@@ -13,7 +13,8 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+import { createBoard } from "@/lib/actions/board";
+import { toast } from "sonner";
 
 export default function CreateBoardDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
 
@@ -23,7 +24,19 @@ export default function CreateBoardDialog({ open, onOpenChange }: { open: boolea
     const handleOpenChange = (open: boolean) => onOpenChange(open);
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    };
+        setIsLoading(true);
+        const result = await createBoard(name);
+        setIsLoading(false);
+        if (result.error) {
+            toast.error(result.error);
+            return;
+        }
+        if (result.success) {
+            toast.success("Board created successfully");
+            handleOpenChange(false);
+        }
+        router.refresh();
+    }
 
 
 

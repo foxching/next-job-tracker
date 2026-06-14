@@ -7,13 +7,20 @@ import {
     DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuSeparator,
 } from "./ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import CreateBoardDialog from "./create-board-dialog";
+import { Board } from "@/lib/models/models.types";
+import { setActiveBoard } from "@/lib/actions/board";
 
+interface BoardSwitcherProps {
+    boards: Board[];
+}
 
-export default function BoardSwitcher() {
+export default function BoardSwitcher({ boards }: BoardSwitcherProps) {
     const [showAddBoardDialog, setShowAddBoardDialog] = useState(false);
+    const [isPending, startTransition] = useTransition();
     return (
         <>
             <DropdownMenu>
@@ -25,6 +32,26 @@ export default function BoardSwitcher() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                    {boards.length > 0 && boards.map((board) => (
+                        <DropdownMenuItem
+                            key={board._id}
+                            onClick={() =>
+                                startTransition(async () => {
+                                    await setActiveBoard(board._id);
+                                })
+                            }
+                        >
+                            {board.name}
+                            {board.isActive && (
+                                <span className="ml-auto text-xs text-muted-foreground">
+                                    Active
+                                </span>
+                            )}
+                        </DropdownMenuItem>
+                    ))}
+                    {boards.length > 0 && (
+                        <DropdownMenuSeparator />
+                    )}
                     <DropdownMenuItem onClick={() => setShowAddBoardDialog(true)}>
                         <Plus className="mr-2 h-4 w-4" />
                         Create new board
