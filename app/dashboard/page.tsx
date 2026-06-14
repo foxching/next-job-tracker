@@ -9,6 +9,7 @@ import connectDB from "@/lib/db";
 import { Board } from "@/lib/models";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import BoardSwitcher from "@/components/board-swticher";
 
 async function getBoard(userId: string) {
     await connectDB();
@@ -41,8 +42,9 @@ async function DashboardPage() {
         <div className="h-[calc(100vh-5rem)] bg-background text-foreground overflow-hidden">
             <div className="flex h-full flex-col w-full px-6 py-6">
                 <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-                    <div>
+                    <div className="flex items-center gap-4">
                         {board && <EditableBoardTitle boardId={board._id} initialName={board.name} />}
+                        <BoardSwitcher />
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <BoardMenu boardId={board._id} />

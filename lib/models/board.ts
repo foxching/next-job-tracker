@@ -4,6 +4,7 @@ export interface IBoard extends Document {
     name: string;
     userId: string;
     columns: mongoose.Types.ObjectId[];
+    isActive?: boolean;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -25,6 +26,10 @@ const BoardSchema = new Schema<IBoard>(
                 ref: "Column",
             },
         ],
+        isActive: {
+            type: Boolean,
+            default: false,
+        },
     },
     {
         timestamps: true,
