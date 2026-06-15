@@ -21,6 +21,7 @@ interface JobApplicationCardProps {
 
 export default function JobApplicationCard({ job, columns, dragHandleProps, }: JobApplicationCardProps) {
     const [isEditing, setIsEditing] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
     const [isDescOpen, setIsDescOpen] = useState(false);
     const [formData, setFormData] = useState({
         company: job.company,
@@ -36,6 +37,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
 
     async function handleUpdate(e: React.FormEvent) {
         e.preventDefault();
+        setIsUpdating(true);
         try {
             const result = await updateJobApplication(job._id, {
                 ...formData,
@@ -51,9 +53,11 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
             }
 
             setIsEditing(false);
+            setIsUpdating(false);
             toast.success("Job application updated successfully!");
         } catch {
             toast.error("Failed to update job application.");
+            setIsUpdating(false);
         }
     }
 
@@ -98,7 +102,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
 
     return (
         <>
-            <Card className="w-full max-w-[320px] mx-auto cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm"  {...dragHandleProps}>
+            <Card className="w-full max-w-[320px] mx-auto cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm"  {...dragHandleProps} onClick={() => setIsDescOpen(true)}>
                 <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
@@ -137,7 +141,10 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                                                     .map((column, key) => (
                                                         <DropdownMenuItem
                                                             key={key}
-                                                            onClick={() => handleMove(column._id)}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleMove(column._id)
+                                                            }}
                                                         >
                                                             <div className="mr-2">
                                                                 {ICON_MAP[column.icon as string] ?? null}
@@ -149,18 +156,20 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                                         )}
                                     </DropdownMenuGroup>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => setIsDescOpen(true)}>
-                                        <Eye className="mr-2 h-4 w-4" />
-                                        View
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                                    <DropdownMenuItem onClick={(e) => {
+                                        e.stopPropagation();
+                                        setIsEditing(true);
+                                    }}>
                                         <Edit2 className="mr-2 h-4 w-4" />
                                         Edit
                                     </DropdownMenuItem>
 
                                     <DropdownMenuItem
                                         className="text-destructive"
-                                        onClick={() => handleDelete()}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleDelete();
+                                        }}
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" />
                                         Delete
@@ -321,7 +330,9 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                             >
                                 Cancel
                             </Button>
-                            <Button type="submit">Save Changes</Button>
+                            <Button type="submit" disabled={isUpdating}>
+                                {isUpdating ? "Updating..." : "Update Application"}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

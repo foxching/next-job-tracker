@@ -37,9 +37,11 @@ const INITIAL_FORM_DATA = {
 export default function CreateJobApplicationDialog({ columnId, boardId }: CreateJobApplicationDialogProps) {
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubmitting(true);
         try {
             const result = await createJobApplication({
                 ...formData,
@@ -58,6 +60,7 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
 
             setFormData(INITIAL_FORM_DATA);
             setOpen(false);
+            setIsSubmitting(false);
             toast.success("Job application created successfully!");
         } catch {
             toast.error("An error occurred while creating the job application.");
@@ -183,7 +186,9 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                         >
                             Cancel
                         </Button>
-                        <Button type="submit">Add Application</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting ? "Creating..." : "Create Application"}
+                        </Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
