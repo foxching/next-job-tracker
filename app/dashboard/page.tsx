@@ -65,7 +65,7 @@ async function DashboardPage() {
                         <BoardSwitcher boards={boards} />
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <BoardMenu boardId={board._id} />
+                        <BoardMenu board={board} />
                         <Button>
                             <Plus className="mr-2 h-4 w-4" />
                             New application

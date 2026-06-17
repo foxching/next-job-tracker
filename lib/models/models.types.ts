@@ -25,6 +25,8 @@ export interface Column {
 export interface Board {
     _id: string;
     name: string;
+    description?: string;
+    themeColor?: string;
     columns: Column[];
     isActive: boolean;
 }

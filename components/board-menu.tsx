@@ -11,12 +11,13 @@ import {
 import { useState } from "react";
 import CreateColumnDialog from "./create-column-dialog";
 import BoardSettingsDialog from "./board-settings-dialog";
+import { Board } from "@/lib/models/models.types";
 
 interface BoardMenuProps {
-    boardId: string;
+    board: Board;
 }
 
-export default function BoardMenu({ boardId }: BoardMenuProps) {
+export default function BoardMenu({ board }: BoardMenuProps) {
     const [showAddColumnDialog, setShowAddColumnDialog] = useState(false);
     const [showBoardSettingsDialog, setShowBoardSettingsDialog] = useState(false);
 
@@ -47,14 +48,14 @@ export default function BoardMenu({ boardId }: BoardMenuProps) {
             </DropdownMenu>
             {showAddColumnDialog && (
                 <CreateColumnDialog
-                    boardId={boardId}
+                    boardId={board._id}
                     open={showAddColumnDialog}
                     onOpenChange={setShowAddColumnDialog}
                 />
             )}
             {showBoardSettingsDialog && (
                 <BoardSettingsDialog
-                    boardId={boardId}
+                    board={board}
                     open={showBoardSettingsDialog}
                     onOpenChange={setShowBoardSettingsDialog}
                 />

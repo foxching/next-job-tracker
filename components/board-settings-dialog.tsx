@@ -8,10 +8,6 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
@@ -21,11 +17,13 @@ import {
     ArrowUpDown,
     DatabaseBackup,
     Trash2,
-    Check,
 } from "lucide-react";
+import GeneralTab from "./board-settings/general-tab";
+import CardDisplayTab from "./board-settings/card-display-tab";
+import { Board } from "@/lib/models/models.types";
 
 type BoardSettingsDialogProps = {
-    boardId: string;
+    board: Board;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
@@ -38,18 +36,9 @@ const TABS = [
     { value: "data", label: "Data", icon: DatabaseBackup },
 ] as const;
 
-const BOARD_COLORS = [
-    "#e91e8c",
-    "#378ADD",
-    "#1D9E75",
-    "#EF9F27",
-    "#7F77DD",
-    "#D85A30",
-    "#888780",
-];
 
 export default function BoardSettingsDialog({
-    boardId,
+    board,
     open,
     onOpenChange,
 }: BoardSettingsDialogProps) {
@@ -107,89 +96,7 @@ export default function BoardSettingsDialog({
                     <div className="flex-1 overflow-y-auto p-6">
                         {/* GENERAL */}
                         <TabsContent value="general" className="mt-0 space-y-5">
-                            <div className="space-y-2">
-                                <Label htmlFor="board-name">Board name</Label>
-                                <Input id="board-name" defaultValue="My Board" />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="board-description">Description</Label>
-                                <Textarea
-                                    id="board-description"
-                                    placeholder="e.g. 2025 job search tracking..."
-                                    rows={3}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Board accent color</Label>
-                                <div className="flex flex-wrap gap-2 pt-1">
-                                    {BOARD_COLORS.map((color, i) => (
-                                        <button
-                                            key={color}
-                                            type="button"
-                                            style={{ backgroundColor: color }}
-                                            className={cn(
-                                                "w-6 h-6 rounded-full flex items-center justify-center",
-                                                i === 0 &&
-                                                "ring-2 ring-offset-2 ring-foreground/40"
-                                            )}
-                                            aria-label={`Select color ${color}`}
-                                        >
-                                            {i === 0 && (
-                                                <Check className="w-3.5 h-3.5 text-white" />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <Separator />
-
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium">Visibility</p>
-                                <p className="text-xs text-muted-foreground">
-                                    Control what shows on each job card
-                                </p>
-                            </div>
-
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="show-salary" className="font-normal">
-                                            Show salary on cards
-                                        </Label>
-                                        <p className="text-xs text-muted-foreground">
-                                            Display salary range below job title
-                                        </p>
-                                    </div>
-                                    <Switch id="show-salary" defaultChecked />
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="show-date" className="font-normal">
-                                            Show applied date
-                                        </Label>
-                                        <p className="text-xs text-muted-foreground">
-                                            Date each job was added
-                                        </p>
-                                    </div>
-                                    <Switch id="show-date" />
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div className="space-y-0.5">
-                                        <Label htmlFor="show-tags" className="font-normal">
-                                            Show tags & labels
-                                        </Label>
-                                        <p className="text-xs text-muted-foreground">
-                                            Priority, remote, job type badges
-                                        </p>
-                                    </div>
-                                    <Switch id="show-tags" />
-                                </div>
-                            </div>
+                            <GeneralTab board={board} />
                         </TabsContent>
 
                         {/* COLUMNS */}
@@ -207,15 +114,7 @@ export default function BoardSettingsDialog({
 
                         {/* CARD DISPLAY */}
                         <TabsContent value="cards" className="mt-0 space-y-4">
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium">Card display</p>
-                                <p className="text-xs text-muted-foreground">
-                                    Choose what appears on each job card
-                                </p>
-                            </div>
-                            <p className="text-sm text-muted-foreground italic">
-                                Card display options go here.
-                            </p>
+                            <CardDisplayTab />
                         </TabsContent>
 
                         {/* SORTING */}
