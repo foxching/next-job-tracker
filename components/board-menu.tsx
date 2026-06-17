@@ -10,6 +10,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useState } from "react";
 import CreateColumnDialog from "./create-column-dialog";
+import BoardSettingsDialog from "./board-settings-dialog";
 
 interface BoardMenuProps {
     boardId: string;
@@ -17,6 +18,8 @@ interface BoardMenuProps {
 
 export default function BoardMenu({ boardId }: BoardMenuProps) {
     const [showAddColumnDialog, setShowAddColumnDialog] = useState(false);
+    const [showBoardSettingsDialog, setShowBoardSettingsDialog] = useState(false);
+
 
     return (
         <>
@@ -33,7 +36,7 @@ export default function BoardMenu({ boardId }: BoardMenuProps) {
                         <Plus className="mr-2 h-4 w-4" />
                         Add column
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowBoardSettingsDialog(true)}>
                         <Settings className="mr-2 h-4 w-4" />
                         Board settings
                     </DropdownMenuItem>
@@ -47,6 +50,13 @@ export default function BoardMenu({ boardId }: BoardMenuProps) {
                     boardId={boardId}
                     open={showAddColumnDialog}
                     onOpenChange={setShowAddColumnDialog}
+                />
+            )}
+            {showBoardSettingsDialog && (
+                <BoardSettingsDialog
+                    boardId={boardId}
+                    open={showBoardSettingsDialog}
+                    onOpenChange={setShowBoardSettingsDialog}
                 />
             )}
         </>
