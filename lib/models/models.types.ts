@@ -30,3 +30,9 @@ export interface Board {
     columns: Column[];
     isActive: boolean;
 }
+
+export type GeneralFormValues = {
+    name: string;
+    description: string;
+    themeColor: string;
+};

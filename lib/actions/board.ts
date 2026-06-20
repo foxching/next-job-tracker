@@ -5,6 +5,12 @@ import { getSession } from "../auth/auth";
 import connectDB from "../db";
 import { Board } from "../models";
 
+type UpdateBoardDetailsInput = {
+    name: string;
+    description?: string;
+    themeColor?: string;
+};
+
 
 export async function createBoard(name: string) {
     const session = await getSession();
@@ -78,6 +84,57 @@ export async function updateBoardName(boardId: string, name: string) {
     } catch (error) {
         console.error("Error updating board name:", error);
         return { error: "Failed to update board name" };
+    }
+}
+
+export async function updateBoardDetails(
+    boardId: string,
+    { name, description, themeColor }: UpdateBoardDetailsInput
+) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { error: "Unauthorized" };
+    }
+
+    if (!name || name.trim() === "") {
+        return { error: "Board name cannot be empty" };
+    }
+
+    await connectDB();
+
+    const board = await Board.findOne({
+        _id: boardId,
+        userId: session.user.id,
+    });
+
+    if (!board) {
+        return { error: "Board not found" };
+    }
+
+    try {
+        const updatedBoard = await Board.findByIdAndUpdate(
+            boardId,
+            {
+                name: name.trim(),
+                description: description?.trim() ?? "",
+                themeColor,
+            },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+
+        console.log(updatedBoard);
+
+
+        revalidatePath("/dashboard");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error updating board details:", error);
+        return { error: "Failed to update board details" };
     }
 }
 

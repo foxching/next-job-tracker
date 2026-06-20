@@ -2,6 +2,8 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IBoard extends Document {
     name: string;
+    description: string;
+    themeColor: string;
     userId: string;
     columns: mongoose.Types.ObjectId[];
     isActive?: boolean;
@@ -14,6 +16,14 @@ const BoardSchema = new Schema<IBoard>(
         name: {
             type: String,
             required: true,
+        },
+        description: {
+            type: String,
+            default: "",
+        },
+        themeColor: {
+            type: String,
+            default: "#7F77DD",
         },
         userId: {
             type: String,
