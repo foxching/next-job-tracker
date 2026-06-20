@@ -20,11 +20,13 @@ import {
 } from "lucide-react";
 import GeneralTab from "./board-settings/general-tab";
 import CardDisplayTab from "./board-settings/card-display-tab";
-import { Board, CardDisplayFormValues, GeneralFormValues } from "@/lib/models/models.types";
+import { Board, CardDisplayFormValues, ColumnFormValues, GeneralFormValues } from "@/lib/models/models.types";
 import { useState } from "react";
 import { updateBoardDetails } from "@/lib/actions/board";
 import { updateCardDisplaySettings } from "@/lib/actions/board";
 import { toast } from "sonner";
+import ColumnTab from "./board-settings/column-tab";
+import { bulkUpdateColumnNames, deleteColumn } from "@/lib/actions/column";
 
 type BoardSettingsDialogProps = {
     board: Board;
@@ -55,11 +57,30 @@ export default function BoardSettingsDialog({
         themeColor: board.themeColor ?? "#e91e8c",
     });
 
+    const [columnValues, setColumnValues] = useState<ColumnFormValues>(
+        Object.fromEntries(board.columns.map((c) => [c._id, { name: c.name }]))
+    );
+
+
     const [cardDisplayValues, setCardDisplayValues] = useState<CardDisplayFormValues>({
         showSalary: board.settings?.cardDisplay?.showSalary ?? true,
         showAppliedDate: board.settings?.cardDisplay?.showAppliedDate ?? false,
         showTags: board.settings?.cardDisplay?.showTags ?? true,
     });
+
+    const handleDeleteColumn = async (columnId: string) => {
+        const result = await deleteColumn(columnId);
+        if (result?.error) {
+            toast.error("Failed to delete column.");
+        } else {
+            toast.success("Column deleted.");
+            setColumnValues((prev) => {
+                const next = { ...prev };
+                delete next[columnId];
+                return next;
+            });
+        }
+    };
 
 
     const handleOpenChange = (next: boolean) => {
@@ -74,6 +95,11 @@ export default function BoardSettingsDialog({
                 showAppliedDate: board.settings?.cardDisplay?.showAppliedDate ?? false,
                 showTags: board.settings?.cardDisplay?.showTags ?? true,
             });
+            setColumnValues(
+                Object.fromEntries(
+                    board.columns.map((c) => [c._id, { name: c.name }])
+                )
+            );
 
         }
         onOpenChange(next);
@@ -94,7 +120,27 @@ export default function BoardSettingsDialog({
             if (selectedTab === "cards") {
                 await updateCardDisplaySettings(board._id, cardDisplayValues);
             }
-            // add other tab save branches here as you build them out:
+            if (selectedTab === "columns") {
+                const changedUpdates = board.columns
+                    .filter(
+                        (col) =>
+                            columnValues[col._id] &&
+                            columnValues[col._id].name.trim() !== col.name
+                    )
+                    .map((col) => ({
+                        columnId: col._id,
+                        name: columnValues[col._id].name,
+                    }));
+
+                if (changedUpdates.length > 0) {
+                    const result = await bulkUpdateColumnNames(changedUpdates);
+                    if (result?.error) {
+                        toast.error(result.error);
+                        setIsSaving(false);
+                        return; // don't close the dialog on partial/failed save
+                    }
+                }
+            }
             onOpenChange(false);
         } catch (err) {
             console.error("Failed to save board settings", err);
@@ -153,33 +199,26 @@ export default function BoardSettingsDialog({
                             </TabsTrigger>
                         </TabsList>
 
-                        {/* Content area */}
-                        <div className="flex-1 overflow-y-auto p-6">
-                            {/* GENERAL */}
-                            <TabsContent value="general" className="mt-0 space-y-5">
+                        <div className="flex-1 overflow-hidden p-6 flex flex-col min-h-0">
+
+                            <TabsContent value="general" className="mt-0 space-y-5 overflow-y-auto data-[state=inactive]:hidden">
                                 <GeneralTab values={generalValues} onChange={setGeneralValues} />
                             </TabsContent>
 
-                            {/* COLUMNS */}
-                            <TabsContent value="columns" className="mt-0 space-y-4">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium">Manage columns</p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Add, remove, reorder, or rename pipeline stages
-                                    </p>
-                                </div>
-                                <p className="text-sm text-muted-foreground italic">
-                                    Column management UI goes here.
-                                </p>
+                            <TabsContent value="columns" className="mt-0 flex-1 min-h-0 data-[state=inactive]:hidden flex flex-col">
+                                <ColumnTab
+                                    columns={board.columns}
+                                    values={columnValues}
+                                    onChange={setColumnValues}
+                                    onDeleteColumn={handleDeleteColumn}
+                                />
                             </TabsContent>
 
-                            {/* CARD DISPLAY */}
-                            <TabsContent value="cards" className="mt-0 space-y-4">
+                            <TabsContent value="cards" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
                                 <CardDisplayTab values={cardDisplayValues} onChange={setCardDisplayValues} />
                             </TabsContent>
 
-                            {/* SORTING */}
-                            <TabsContent value="sorting" className="mt-0 space-y-4">
+                            <TabsContent value="sorting" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium">Sorting & filtering</p>
                                     <p className="text-xs text-muted-foreground">
@@ -191,8 +230,7 @@ export default function BoardSettingsDialog({
                                 </p>
                             </TabsContent>
 
-                            {/* DATA */}
-                            <TabsContent value="data" className="mt-0 space-y-4">
+                            <TabsContent value="data" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium">Data</p>
                                     <p className="text-xs text-muted-foreground">
@@ -204,8 +242,7 @@ export default function BoardSettingsDialog({
                                 </p>
                             </TabsContent>
 
-                            {/* DANGER ZONE */}
-                            <TabsContent value="danger" className="mt-0 space-y-4">
+                            <TabsContent value="danger" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
                                 <div className="space-y-1">
                                     <p className="text-sm font-medium text-destructive">
                                         Danger zone

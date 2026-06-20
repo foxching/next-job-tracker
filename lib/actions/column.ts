@@ -5,6 +5,11 @@ import { getSession } from "../auth/auth";
 import connectDB from "../db";
 import { Board, Column, JobApplication } from "../models";
 
+type ColumnNameUpdate = {
+    columnId: string;
+    name: string;
+};
+
 export async function createColumn(boardId: string, name: string, icon: string, color: string) {
     const session = await getSession();
 
@@ -136,4 +141,53 @@ export async function deleteColumn(columnId: string) {
     revalidatePath("/dashboard");
 
     return { success: true };
+}
+
+export async function bulkUpdateColumnNames(updates: ColumnNameUpdate[]) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { error: "Unauthorized" };
+    }
+
+    if (!updates || updates.length === 0) {
+        return { error: "No column updates provided" };
+    }
+
+    // validate every name before writing anything
+    for (const { name } of updates) {
+        if (!name || name.trim() === "") {
+            return { error: "Column name cannot be empty" };
+        }
+    }
+
+    await connectDB();
+
+    try {
+        // bulkWrite issues one round trip instead of N separate updateOne calls
+        const result = await Column.bulkWrite(
+            updates.map(({ columnId, name }) => ({
+                updateOne: {
+                    filter: { _id: columnId },
+                    update: { $set: { name: name.trim() } },
+                },
+            }))
+        );
+        if (result.matchedCount !== updates.length) {
+            // some columnIds didn't belong to this user or didn't exist —
+            // partial success; surface it rather than pretending all succeeded
+            return {
+                error: "Some columns could not be updated",
+                matched: result.matchedCount,
+                expected: updates.length,
+            };
+        }
+
+        revalidatePath("/dashboard");
+
+        return { success: true, modifiedCount: result.modifiedCount };
+    } catch (error) {
+        console.error("Error bulk updating column names:", error);
+        return { error: "Failed to update column names" };
+    }
 }

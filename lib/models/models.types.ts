@@ -49,3 +49,9 @@ export type CardDisplayFormValues = {
     showAppliedDate: boolean;
     showTags: boolean;
 };
+
+export type ColumnFormValues = {
+    [columnId: string]: {
+        name: string;
+    };
+};
