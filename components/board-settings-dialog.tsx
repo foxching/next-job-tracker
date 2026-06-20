@@ -29,6 +29,9 @@ import { updateCardDisplaySettings } from "@/lib/actions/board";
 import { toast } from "sonner";
 import ColumnTab from "./board-settings/column-tab";
 import { bulkUpdateColumnNames, deleteColumn } from "@/lib/actions/column";
+import SortingTab from "./board-settings/sorting-tab";
+import DataTab from "./board-settings/data-tab";
+import DeleteBoardTab from "./board-settings/delete-board-tab";
 
 type BoardSettingsDialogProps = {
     board: Board;
@@ -221,50 +224,15 @@ export default function BoardSettingsDialog({
                             </TabsContent>
 
                             <TabsContent value="sorting" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium">Sorting & filtering</p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Set default order and manage saved filters
-                                    </p>
-                                </div>
-                                <p className="text-sm text-muted-foreground italic">
-                                    Sorting options go here.
-                                </p>
+                                <SortingTab />
                             </TabsContent>
 
                             <TabsContent value="data" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium">Data</p>
-                                    <p className="text-xs text-muted-foreground">
-                                        Export, duplicate, or archive this board
-                                    </p>
-                                </div>
-                                <p className="text-sm text-muted-foreground italic">
-                                    Export / duplicate / archive actions go here.
-                                </p>
+                                <DataTab />
                             </TabsContent>
 
                             <TabsContent value="danger" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
-                                <div className="space-y-1">
-                                    <p className="text-sm font-medium text-destructive">
-                                        Danger zone
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">
-                                        These actions are permanent and cannot be undone
-                                    </p>
-                                </div>
-                                <div className="border border-destructive/30 rounded-md p-4 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium">Delete this board</p>
-                                        <p className="text-xs text-muted-foreground">
-                                            Permanently remove this board and all its jobs
-                                        </p>
-                                    </div>
-                                    <Button variant="destructive" size="sm">
-                                        <Trash2 className="w-4 h-4 mr-1.5" />
-                                        Delete
-                                    </Button>
-                                </div>
+                                <DeleteBoardTab />
                             </TabsContent>
                         </div>
                     </Tabs>
