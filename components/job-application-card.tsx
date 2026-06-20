@@ -13,13 +13,20 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { toast } from "sonner";
 
+type CardDisplaySettings = {
+    showSalary: boolean;
+    showAppliedDate: boolean;
+    showTags: boolean;
+};
+
 interface JobApplicationCardProps {
     job: JobApplication;
     columns: Column[];
     dragHandleProps?: React.HTMLAttributes<HTMLElement>;
+    cardDisplay: CardDisplaySettings;
 }
 
-export default function JobApplicationCard({ job, columns, dragHandleProps, }: JobApplicationCardProps) {
+export default function JobApplicationCard({ job, columns, dragHandleProps, cardDisplay }: JobApplicationCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDescOpen, setIsDescOpen] = useState(false);
@@ -34,6 +41,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
         tags: job.tags?.join(", ") || "",
         description: job.description || "",
     });
+    const [showAllTags, setShowAllTags] = useState(false);
 
     async function handleUpdate(e: React.FormEvent) {
         e.preventDefault();
@@ -102,7 +110,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
 
     return (
         <>
-            <Card className="w-full max-w-[320px] mx-auto cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm"  {...dragHandleProps} onClick={() => setIsDescOpen(true)}>
+            <Card className="w-[320px] min-w-[300px] max-w-[300px] cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm" {...dragHandleProps} onClick={() => setIsDescOpen(true)}>
                 <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
@@ -110,19 +118,50 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                             <p className="text-xs text-muted-foreground mb-1 truncate">
                                 {job.company}
                             </p>
-                            <small className="text-xs font-bold text-foreground">{job.salary}</small>
-                            <div>
-                                {job.jobUrl && (
-                                    <a
-                                        href={job.jobUrl}
-                                        target="_blank"
-                                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <ExternalLink className="h-3 w-3" />
-                                    </a>
-                                )}
-                            </div>
+                            {cardDisplay.showSalary && job.salary && (
+                                <small className="text-xs font-bold text-foreground">{job.salary}</small>
+                            )}
+                            {cardDisplay.showTags && job.tags && job.tags.length > 0 && (
+                                <div className="mt-2">
+                                    <div className="flex flex-wrap gap-2">
+                                        {(showAllTags ? job.tags : job.tags.slice(0, 3)).map((tag, i) => (
+                                            <span
+                                                key={i}
+                                                className="
+                                                    max-w-[100px]
+                                                    px-2 py-1
+                                                    text-xs
+                                                    rounded-full
+                                                    bg-blue-100
+                                                    text-blue-700
+                                                    overflow-hidden
+                                                    text-ellipsis
+                                                    whitespace-nowrap
+                                                "
+                                                title={tag}
+                                            >
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    {job.tags.length > 3 && (
+                                        <Button
+                                            variant="link"
+                                            size="sm"
+                                            className="h-auto p-0 mt-2 text-xs text-blue-700 hover:underline"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setShowAllTags(!showAllTags);
+                                            }}
+                                        >
+                                            {showAllTags
+                                                ? "See less"
+                                                : `See ${job.tags.length - 3} more`}
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
                         </div>
                         <div className="flex items-start gap-1">
                             <DropdownMenu>
@@ -213,6 +252,19 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, }: J
                                 </div>
                             </div>
                         )}
+                        <div className="mt-4">
+                            <small className="text-sm text-muted-foreground ml-2">Source</small>
+                            {job.jobUrl && (
+                                <a
+                                    href={job.jobUrl}
+                                    target="_blank"
+                                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1 mr-2"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <ExternalLink className="h-3 w-3" />
+                                </a>
+                            )}
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDescOpen(false)}>Close</Button>

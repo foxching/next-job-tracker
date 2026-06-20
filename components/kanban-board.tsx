@@ -38,6 +38,16 @@ interface ColConfig {
     icon: React.ReactNode;
 }
 
+type CardDisplaySettings =
+    NonNullable<NonNullable<Board["settings"]>["cardDisplay"]>;
+
+const DEFAULT_CARD_DISPLAY: CardDisplaySettings = {
+    showSalary: true,
+    showAppliedDate: false,
+    showTags: true,
+};
+
+
 const ICON_MAP: Record<string, React.ReactNode> = {
     Calendar: <Calendar className="h-4 w-4" />,
     CheckCircle2: <CheckCircle2 className="h-4 w-4" />,
@@ -51,7 +61,7 @@ const DEFAULT_COLUMN_CONFIG: ColConfig = {
     icon: <Calendar className="h-4 w-4" />,
 };
 
-function DroppableColumn({ column, config, boardId, sortedColumns }: { column: Column, config: ColConfig, boardId: string, sortedColumns: Column[] }) {
+function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay }: { column: Column, config: ColConfig, boardId: string, sortedColumns: Column[], cardDisplay: CardDisplaySettings }) {
     const [showEditColumnDialog, setShowEditColumnDialog] = useState(false);
     const sortedJobs =
         column.jobApplications?.sort((a, b) => a.order - b.order) || [];
@@ -122,6 +132,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
                                 key={job._id}
                                 job={{ ...job, columnId: job.columnId || column._id }}
                                 columns={sortedColumns}
+                                cardDisplay={cardDisplay}
                             />
                         ))}
                     </SortableContext>
@@ -142,7 +153,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns }: { column: C
     );
 }
 
-function SortableJobCard({ job, columns }: { job: JobApplication, columns: Column[] }) {
+function SortableJobCard({ job, columns, cardDisplay }: { job: JobApplication, columns: Column[], cardDisplay: CardDisplaySettings }) {
     const {
         attributes,
         listeners,
@@ -165,7 +176,7 @@ function SortableJobCard({ job, columns }: { job: JobApplication, columns: Colum
     };
     return (
         <div ref={setNodeRef} style={style}>
-            <JobApplicationCard job={job} columns={columns} dragHandleProps={{ ...attributes, ...listeners }} />
+            <JobApplicationCard job={job} columns={columns} dragHandleProps={{ ...attributes, ...listeners }} cardDisplay={cardDisplay} />
         </div>
     )
 }
@@ -182,6 +193,13 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
             },
         })
     );
+
+    const cardDisplay: CardDisplaySettings = {
+        showSalary: board.settings?.cardDisplay?.showSalary ?? DEFAULT_CARD_DISPLAY.showSalary,
+        showAppliedDate: board.settings?.cardDisplay?.showAppliedDate ?? DEFAULT_CARD_DISPLAY.showAppliedDate,
+        showTags: board.settings?.cardDisplay?.showTags ?? DEFAULT_CARD_DISPLAY.showTags,
+    };
+
 
     async function handleDragStart(event: DragStartEvent) {
         setActiveId(event.active.id as string);
@@ -309,6 +327,7 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
                                     config={config}
                                     boardId={board._id}
                                     sortedColumns={sortedColumns}
+                                    cardDisplay={cardDisplay}
                                 />
                             );
                         })}
@@ -330,7 +349,7 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
             <DragOverlay>
                 {activeJob ? (
                     <div className="opacity-50">
-                        <JobApplicationCard job={activeJob} columns={sortedColumns} />
+                        <JobApplicationCard job={activeJob} columns={sortedColumns} cardDisplay={cardDisplay} />
                     </div>
                 ) : null}
             </DragOverlay>
