@@ -29,10 +29,23 @@ export interface Board {
     themeColor?: string;
     columns: Column[];
     isActive: boolean;
+    settings?: {
+        cardDisplay?: {
+            showSalary: boolean;
+            showAppliedDate: boolean;
+            showTags: boolean;
+        }
+    }
 }
 
 export type GeneralFormValues = {
     name: string;
     description: string;
     themeColor: string;
+};
+
+export type CardDisplayFormValues = {
+    showSalary: boolean;
+    showAppliedDate: boolean;
+    showTags: boolean;
 };

@@ -11,6 +11,11 @@ type UpdateBoardDetailsInput = {
     themeColor?: string;
 };
 
+type UpdateCardDisplayInput = {
+    showSalary: boolean;
+    showAppliedDate: boolean;
+    showTags: boolean;
+};
 
 export async function createBoard(name: string) {
     const session = await getSession();
@@ -135,6 +140,53 @@ export async function updateBoardDetails(
     } catch (error) {
         console.error("Error updating board details:", error);
         return { error: "Failed to update board details" };
+    }
+}
+
+export async function updateCardDisplaySettings(
+    boardId: string,
+    { showSalary, showAppliedDate, showTags }: UpdateCardDisplayInput
+) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { error: "Unauthorized" };
+    }
+
+    const board = await Board.findOne({
+        _id: boardId,
+        userId: session.user.id,
+    });
+
+    if (!board) {
+        return { error: "Board not found" };
+    }
+
+    await connectDB();
+
+    try {
+        const updatedBoard = await Board.findOneAndUpdate(
+            { _id: boardId, userId: session.user.id },
+            {
+                "settings.cardDisplay.showSalary": showSalary,
+                "settings.cardDisplay.showAppliedDate": showAppliedDate,
+                "settings.cardDisplay.showTags": showTags,
+            },
+            { new: true }
+        ).lean();
+
+        if (!updatedBoard) {
+            return { error: "Board not found" };
+        }
+
+        revalidatePath("/dashboard");
+
+        const plainBoard = JSON.parse(JSON.stringify(updatedBoard));
+
+        return { success: true, board: plainBoard };
+    } catch (error) {
+        console.error("Error updating card display settings:", error);
+        return { error: "Failed to update card display settings" };
     }
 }
 

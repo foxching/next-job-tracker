@@ -20,9 +20,10 @@ import {
 } from "lucide-react";
 import GeneralTab from "./board-settings/general-tab";
 import CardDisplayTab from "./board-settings/card-display-tab";
-import { Board, GeneralFormValues } from "@/lib/models/models.types";
+import { Board, CardDisplayFormValues, GeneralFormValues } from "@/lib/models/models.types";
 import { useState } from "react";
 import { updateBoardDetails } from "@/lib/actions/board";
+import { updateCardDisplaySettings } from "@/lib/actions/board";
 import { toast } from "sonner";
 
 type BoardSettingsDialogProps = {
@@ -54,6 +55,13 @@ export default function BoardSettingsDialog({
         themeColor: board.themeColor ?? "#e91e8c",
     });
 
+    const [cardDisplayValues, setCardDisplayValues] = useState<CardDisplayFormValues>({
+        showSalary: board.settings?.cardDisplay?.showSalary ?? true,
+        showAppliedDate: board.settings?.cardDisplay?.showAppliedDate ?? false,
+        showTags: board.settings?.cardDisplay?.showTags ?? true,
+    });
+
+
     const handleOpenChange = (next: boolean) => {
         if (!next) {
             setGeneralValues({
@@ -61,6 +69,12 @@ export default function BoardSettingsDialog({
                 description: board.description ?? "",
                 themeColor: board.themeColor ?? "#e91e8c",
             });
+            setCardDisplayValues({
+                showSalary: board.settings?.cardDisplay?.showSalary ?? true,
+                showAppliedDate: board.settings?.cardDisplay?.showAppliedDate ?? false,
+                showTags: board.settings?.cardDisplay?.showTags ?? true,
+            });
+
         }
         onOpenChange(next);
     };
@@ -77,9 +91,10 @@ export default function BoardSettingsDialog({
                 });
                 toast.success("Board details updated");
             }
+            if (selectedTab === "cards") {
+                await updateCardDisplaySettings(board._id, cardDisplayValues);
+            }
             // add other tab save branches here as you build them out:
-            // if (selectedTab === "cards") { await updateCardDisplaySettings(...) }
-
             onOpenChange(false);
         } catch (err) {
             console.error("Failed to save board settings", err);
@@ -100,7 +115,8 @@ export default function BoardSettingsDialog({
                         </DialogDescription>
                     </DialogHeader>
                     <Tabs
-                        defaultValue="general"
+                        value={selectedTab}
+                        onValueChange={setSelectedTab}
                         orientation="vertical"
                         className="flex-1 flex flex-row overflow-hidden min-h-0"
                     >
@@ -159,7 +175,7 @@ export default function BoardSettingsDialog({
 
                             {/* CARD DISPLAY */}
                             <TabsContent value="cards" className="mt-0 space-y-4">
-                                <CardDisplayTab />
+                                <CardDisplayTab values={cardDisplayValues} onChange={setCardDisplayValues} />
                             </TabsContent>
 
                             {/* SORTING */}

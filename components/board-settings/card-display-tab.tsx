@@ -1,8 +1,16 @@
 
+"use client";
+
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { CardDisplayFormValues } from "@/lib/models/models.types";
 
-export default function CardDisplayTab() {
+type CardDisplayTabProps = {
+    values: CardDisplayFormValues;
+    onChange: (values: CardDisplayFormValues) => void;
+};
+
+export default function CardDisplayTab({ values, onChange }: CardDisplayTabProps) {
     return (
         <div className="space-y-4">
             <div className="space-y-4">
@@ -23,7 +31,13 @@ export default function CardDisplayTab() {
                                 Display salary range below job title
                             </p>
                         </div>
-                        <Switch id="show-salary" defaultChecked />
+                        <Switch
+                            id="show-salary"
+                            checked={values.showSalary}
+                            onCheckedChange={(checked) =>
+                                onChange({ ...values, showSalary: checked })
+                            }
+                        />
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -35,7 +49,14 @@ export default function CardDisplayTab() {
                                 Date each job was added
                             </p>
                         </div>
-                        <Switch id="show-date" />
+                        <Switch
+                            id="show-date"
+                            checked={values.showAppliedDate}
+                            onCheckedChange={(checked) =>
+                                onChange({ ...values, showAppliedDate: checked })
+                            }
+                        />
+
                     </div>
 
                     <div className="flex items-center justify-between">
@@ -47,8 +68,15 @@ export default function CardDisplayTab() {
                                 Priority, remote, job type badges
                             </p>
                         </div>
-                        <Switch id="show-tags" />
+                        <Switch
+                            id="show-tags"
+                            checked={values.showTags}
+                            onCheckedChange={(checked) =>
+                                onChange({ ...values, showTags: checked })
+                            }
+                        />
                     </div>
+
                 </div>
             </div>
         </div>
