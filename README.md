@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Job Tracker
+
+A Kanban-style job application tracker built with Next.js, Mongodb, and Shadcn UI. Organize applications into fully customizable columns with support for multiple boards.
+
+**Live demo:** [next-job-tracker-eight.vercel.app](https://next-job-tracker-eight.vercel.app)
+
+## Features
+
+- **Kanban board** — drag-and-drop style columns representing each stage of your job search pipeline
+- **Job application cards** — track company, position, location, salary range, job URL, tags, description, and notes per application
+- **Multi-board support** — create and switch between separate boards (e.g. "2025 Job Hunt", "Internships")
+- **Board settings** — rename boards, manage columns, customize card display, and set sorting preferences
+- **Light & dark mode**
+- **Authentication** — per-user boards and applications, scoped to the signed-in account
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | [Next.js](https://nextjs.org/) (App Router) |
+| UI Components | [Shadcn UI](https://ui.shadcn.com/) |
+| Icons | [Lucide React](https://lucide.dev/) |
+| Styling | Tailwind CSS |
+| Database | MongoDB with Mongoose |
+| Authentication | [Better Auth](https://www.better-auth.com/) |
+| Deployment | Vercel |
+
+## Screenshots
+
+### Dashboard
+Track applications across pipeline stages with a clean, color-coded board.
+
+### Add Job Application
+Quickly log a new application with company, position, salary, tags, and notes.
+
+### Edit Job Application
+Update application details as your status changes.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- A MongoDB instance (local or [Atlas](https://www.mongodb.com/atlas))
+
+### Installation
+
+```bash
+git clone https://github.com/<your-username>/job-tracker.git
+cd job-tracker
+npm install
+```
+
+### Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+BETTER_AUTH_SECRET=your_auth_secret
+BETTER_AUTH_URL=http://localhost:3000
+```
+
+### Run Locally
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+.
+├── app/
+│   ├── dashboard/          # Main board view (Server Component, fetches initial data)
+│   └── ...
+├── components/
+│   ├── ui/                 # Shadcn UI primitives
+│   └── board-settings/     # Board settings dialog and tabs
+├── lib/
+│   ├── models/              # Mongoose schemas
+│   ├── db.ts                # Database connection
+│   └── auth.ts               # Better Auth configuration
+└── ...
+```
 
-## Learn More
+## Roadmap
 
-To learn more about Next.js, take a look at the following resources:
+- [ ] Drag-and-drop reordering between columns
+- [ ] Export board data (CSV/JSON)
+- [ ] Saved filters and custom sort orders
+- [ ] Board duplication and archiving
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Contributions are welcome. Please open an issue first to discuss any major changes.
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the [MIT License](LICENSE).
