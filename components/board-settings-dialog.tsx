@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import GeneralTab from "./board-settings/general-tab";
 import CardDisplayTab from "./board-settings/card-display-tab";
-import { Board, CardDisplayFormValues, ColumnFormValues, GeneralFormValues } from "@/lib/models/models.types";
+import { Board, CardDisplayFormValues, ColumnFormValues, GeneralFormValues, SortingFormValues } from "@/lib/models/models.types";
 import { useState } from "react";
 import { updateBoardDetails } from "@/lib/actions/board";
 import { updateCardDisplaySettings } from "@/lib/actions/board";
@@ -73,6 +73,11 @@ export default function BoardSettingsDialog({
         showTags: board.settings?.cardDisplay?.showTags ?? true,
     });
 
+    const [sortingValues, setSortingValues] = useState<SortingFormValues>({
+        field: board.settings?.sorting?.field ?? "createdAt",
+        direction: board.settings?.sorting?.direction ?? "desc"
+    })
+
     const handleDeleteColumn = async (columnId: string) => {
         const result = await deleteColumn(columnId);
         if (result?.error) {
@@ -105,7 +110,10 @@ export default function BoardSettingsDialog({
                     board.columns.map((c) => [c._id, { name: c.name }])
                 )
             );
-
+            setSortingValues({
+                field: board.settings?.sorting?.field ?? "createdAt",
+                direction: board.settings?.sorting?.direction ?? "desc"
+            })
         }
         onOpenChange(next);
     };
@@ -145,6 +153,9 @@ export default function BoardSettingsDialog({
                         return; // don't close the dialog on partial/failed save
                     }
                 }
+            }
+            if (selectedTab === "sorting") {
+                //add sorting action here
             }
             onOpenChange(false);
         } catch (err) {
@@ -224,7 +235,7 @@ export default function BoardSettingsDialog({
                             </TabsContent>
 
                             <TabsContent value="sorting" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
-                                <SortingTab />
+                                <SortingTab values={sortingValues} onChange={setSortingValues} />
                             </TabsContent>
 
                             <TabsContent value="data" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">

@@ -1,3 +1,13 @@
+export type SortField =
+    | "createdAt"
+    | "company"
+    | "position"
+    | "manual";
+
+export type SortDirection =
+    | "asc"
+    | "desc";
+
 export interface JobApplication {
     _id: string;
     company: string;
@@ -36,9 +46,14 @@ export interface Board {
             showAppliedDate: boolean;
             showTags: boolean;
         }
+        sorting?: {
+            field: SortField;
+            direction: SortDirection
+        }
     }
 }
 
+//BOARD SETTINGS
 export type GeneralFormValues = {
     name: string;
     description: string;
@@ -55,4 +70,9 @@ export type ColumnFormValues = {
     [columnId: string]: {
         name: string;
     };
+};
+
+export type SortingFormValues = {
+    field: "createdAt" | "company" | "position" | "manual";
+    direction: "asc" | "desc";
 };

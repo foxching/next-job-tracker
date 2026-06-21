@@ -67,7 +67,7 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
     }
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger>
+            <DialogTrigger asChild>
                 <Button
                     variant="outline"
                     className="w-full mb-4 justify-start text-foreground/60 border-dashed border-2 border-border hover:border-solid hover:bg-muted/30"
