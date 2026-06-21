@@ -10,6 +10,7 @@ export interface JobApplication {
     order: number;
     columnId?: string;
     tags?: string[];
+    appliedDate?: string;
     description?: string;
 }
 

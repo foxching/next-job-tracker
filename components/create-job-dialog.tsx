@@ -11,12 +11,10 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
 import { useState } from "react";
 import { createJobApplication } from "@/lib/actions/job-application";
 import { toast } from "sonner";
+import JobApplicationForm from "./form/job-application-form";
 
 interface CreateJobApplicationDialogProps {
     columnId: string;
@@ -31,6 +29,7 @@ const INITIAL_FORM_DATA = {
     salary: "",
     jobUrl: "",
     tags: "",
+    appliedDate: "",
     description: "",
 };
 
@@ -85,98 +84,11 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                     </DialogDescription>
                 </DialogHeader>
                 <form className="flex h-full min-h-0 flex-col " onSubmit={handleSubmit}>
-                    <div className="flex-1 overflow-y-auto min-h-0 pr-2">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="company">Company *</Label>
-                                <Input
-                                    id="company"
-                                    required
-                                    value={formData.company}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, company: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="position">Position *</Label>
-                                <Input
-                                    id="position"
-                                    required
-                                    value={formData.position}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, position: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="location">Location</Label>
-                                <Input
-                                    id="location"
-                                    value={formData.location}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, location: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="salary">Salary</Label>
-                                <Input
-                                    id="salary"
-                                    placeholder="e.g., $100k - $150k"
-                                    value={formData.salary}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, salary: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="jobUrl">Job URL</Label>
-                                <Input
-                                    id="jobUrl"
-                                    type="url"
-                                    placeholder="https://..."
-                                    value={formData.jobUrl}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, jobUrl: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                                <Input
-                                    id="tags"
-                                    placeholder="React, Tailwind, High Pay"
-                                    value={formData.tags}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, tags: e.target.value })
-                                    }
-                                />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                rows={3}
-                                placeholder="Brief description of the role..."
-                                value={formData.description}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, description: e.target.value })
-                                }
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="notes">Notes</Label>
-                            <Textarea
-                                id="notes"
-                                rows={4}
-                                value={formData.notes}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, notes: e.target.value })
-                                }
-                            />
-                        </div>
+                    <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
+                        <JobApplicationForm
+                            formData={formData}
+                            setFormData={setFormData}
+                        />
                     </div>
                     <DialogFooter className="shrink-0 pt-4 border-t">
                         <Button

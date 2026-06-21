@@ -8,10 +8,8 @@ import { Button } from "./ui/button";
 import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-application";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Textarea } from "./ui/textarea";
-import { Label } from "./ui/label";
-import { Input } from "./ui/input";
 import { toast } from "sonner";
+import JobApplicationForm, { JobApplicationFormData } from "./form/job-application-form";
 
 type CardDisplaySettings = {
     showSalary: boolean;
@@ -30,17 +28,20 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
     const [isEditing, setIsEditing] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDescOpen, setIsDescOpen] = useState(false);
-    const [formData, setFormData] = useState({
-        company: job.company,
-        position: job.position,
-        location: job.location || "",
-        notes: job.notes || "",
-        salary: job.salary || "",
-        jobUrl: job.jobUrl || "",
-        columnId: job.columnId || "",
-        tags: job.tags?.join(", ") || "",
-        description: job.description || "",
-    });
+    const [formData, setFormData] =
+        useState<JobApplicationFormData>({
+            company: job.company,
+            position: job.position,
+            location: job.location || "",
+            notes: job.notes || "",
+            salary: job.salary || "",
+            jobUrl: job.jobUrl || "",
+            tags: job.tags?.join(", ") || "",
+            appliedDate: job.appliedDate
+                ? new Date(job.appliedDate).toISOString().split("T")[0]
+                : "",
+            description: job.description || "",
+        });
     const [showAllTags, setShowAllTags] = useState(false);
 
     async function handleUpdate(e: React.FormEvent) {
@@ -279,99 +280,10 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                     </DialogHeader>
                     <form className="flex h-full min-h-0 flex-col " onSubmit={handleUpdate}>
                         <div className="flex-1 overflow-y-auto min-h-0 pr-2">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="company">Company *</Label>
-                                    <Input
-                                        id="company"
-                                        required
-                                        value={formData.company}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, company: e.target.value })
-                                        }
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="position">Position *</Label>
-                                    <Input
-                                        id="position"
-                                        required
-                                        value={formData.position}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, position: e.target.value })
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="location">Location</Label>
-                                    <Input
-                                        id="location"
-                                        value={formData.location}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, location: e.target.value })
-                                        }
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="salary">Salary</Label>
-                                    <Input
-                                        id="salary"
-                                        placeholder="e.g., $100k - $150k"
-                                        value={formData.salary}
-                                        onChange={(e) =>
-                                            setFormData({ ...formData, salary: e.target.value })
-                                        }
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="jobUrl">Job URL</Label>
-                                <Input
-                                    id="jobUrl"
-                                    type="url"
-                                    placeholder="https://..."
-                                    value={formData.jobUrl}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, jobUrl: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                                <Input
-                                    id="tags"
-                                    placeholder="React, Tailwind, High Pay"
-                                    value={formData.tags}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, tags: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    rows={3}
-                                    placeholder="Brief description of the role..."
-                                    value={formData.description}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, description: e.target.value })
-                                    }
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="notes">Notes</Label>
-                                <Textarea
-                                    id="notes"
-                                    rows={4}
-                                    value={formData.notes}
-                                    onChange={(e) =>
-                                        setFormData({ ...formData, notes: e.target.value })
-                                    }
-                                />
-                            </div>
+                            <JobApplicationForm
+                                formData={formData}
+                                setFormData={setFormData}
+                            />
                         </div>
 
                         <DialogFooter>
