@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "../auth/auth";
 import connectDB from "../db";
 import { Board } from "../models";
+import { SortField } from "../models/models.types";
+import { SortDirection } from "mongodb";
 
 type UpdateBoardDetailsInput = {
     name: string;
@@ -15,6 +17,11 @@ type UpdateCardDisplayInput = {
     showSalary: boolean;
     showAppliedDate: boolean;
     showTags: boolean;
+};
+
+type SortSettingsInput = {
+    field: SortField;
+    direction: SortDirection;
 };
 
 export async function createBoard(name: string) {
@@ -227,4 +234,79 @@ export async function setActiveBoard(boardId: string) {
     revalidatePath("/dashboard");
 
     return { success: true };
+}
+
+export async function updateSortSettings(
+    boardId: string,
+    { field, direction }: SortSettingsInput
+) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { error: "Unauthorized" };
+    }
+
+    const board = await Board.findOne({
+        _id: boardId,
+        userId: session.user.id,
+    });
+
+    if (!board) {
+        return { error: "Board not found" };
+    }
+
+    await connectDB();
+
+    try {
+        const updatedBoard = await Board.findOneAndUpdate(
+            { _id: boardId, userId: session.user.id },
+            {
+                "settings.sorting.field": field,
+                "settings.sorting.direction": direction,
+            },
+            { new: true }
+        ).lean();
+
+        if (!updatedBoard) {
+            return { error: "Board not found" };
+        }
+
+        revalidatePath("/dashboard");
+
+        const plainBoard = JSON.parse(JSON.stringify(updatedBoard));
+
+        return { success: true, board: plainBoard };
+    } catch (error) {
+        console.error("Error updating sort settings:", error);
+        return { error: "Failed to update srot settings" };
+    }
+}
+
+export async function setSortFieldManual(boardId: string) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { error: "Unauthorized" };
+    }
+
+    await connectDB();
+
+    try {
+        const updatedBoard = await Board.findOneAndUpdate(
+            { _id: boardId, userId: session.user.id },
+            { "settings.sorting.field": "manual" },
+            { new: true }
+        ).lean();
+
+        if (!updatedBoard) {
+            return { error: "Board not found" };
+        }
+
+        revalidatePath("/dashboard");
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error switching board to manual sort:", error);
+        return { error: "Failed to switch to manual sort" };
+    }
 }

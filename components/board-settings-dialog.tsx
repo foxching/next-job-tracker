@@ -26,6 +26,7 @@ import { Board, CardDisplayFormValues, ColumnFormValues, GeneralFormValues, Sort
 import { useState } from "react";
 import { updateBoardDetails } from "@/lib/actions/board";
 import { updateCardDisplaySettings } from "@/lib/actions/board";
+import { updateSortSettings } from "@/lib/actions/board";
 import { toast } from "sonner";
 import ColumnTab from "./board-settings/column-tab";
 import { bulkUpdateColumnNames, deleteColumn } from "@/lib/actions/column";
@@ -132,6 +133,7 @@ export default function BoardSettingsDialog({
             }
             if (selectedTab === "cards") {
                 await updateCardDisplaySettings(board._id, cardDisplayValues);
+                toast.success("Card Display settings updated");
             }
             if (selectedTab === "columns") {
                 const changedUpdates = board.columns
@@ -153,9 +155,11 @@ export default function BoardSettingsDialog({
                         return; // don't close the dialog on partial/failed save
                     }
                 }
+                toast.success("columns settings updated");
             }
             if (selectedTab === "sorting") {
-                //add sorting action here
+                await updateSortSettings(board._id, sortingValues);
+                toast.success("Sortsettings updated");
             }
             onOpenChange(false);
         } catch (err) {

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { Board, Column, JobApplication } from "../models/models.types";
 import { updateJobApplication } from "../actions/job-application";
-
+import { setSortFieldManual } from "@/lib/actions/board";
+import { toast } from "sonner";
 
 export function useBoard(initialBoard?: Board | null) {
     const [board, setBoard] = useState<Board | null>(initialBoard || null);
@@ -82,6 +83,26 @@ export function useBoard(initialBoard?: Board | null) {
                 columnId: newColumnId,
                 order: newOrder,
             });
+            if (board) {
+                const currentSortField = board?.settings?.sorting?.field ?? "createdAt";
+                if (currentSortField !== "manual") {
+                    const result = await setSortFieldManual(board._id);
+                    if (!result?.error) {
+                        toast.info(
+                            "Switched to manual ordering since you moved a card.",
+                            {
+                                description:
+                                    "Change this anytime in Board Settings → Sorting.",
+                            }
+                        );
+                        // optimistically update local board state so the Sorting tab
+                        // reflects "Manual" immediately if settings dialog is reopened
+                        // without a full page reload — adjust to however you manage
+                        // board state (useState, SWR mutate, React Query setQueryData, etc.)
+                    }
+                }
+            }
+
         } catch (err) {
             console.error("Error", err);
         }

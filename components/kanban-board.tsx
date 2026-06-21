@@ -1,7 +1,7 @@
 "use client";
 
 import { Board, Column, JobApplication } from "@/lib/models/models.types";
-import { Award, Calendar, CheckCircle2, Edit2, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { Award, Calendar, CheckCircle2, Edit2, Mic, MoreVertical, Trash2, XCircle, ArrowUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
@@ -40,6 +40,7 @@ interface ColConfig {
 
 type CardDisplaySettings =
     NonNullable<NonNullable<Board["settings"]>["cardDisplay"]>;
+type SortingSettings = NonNullable<NonNullable<Board["settings"]>["sorting"]>;
 
 const DEFAULT_CARD_DISPLAY: CardDisplaySettings = {
     showSalary: true,
@@ -47,6 +48,56 @@ const DEFAULT_CARD_DISPLAY: CardDisplaySettings = {
     showTags: true,
 };
 
+const DEFAULT_SORTING: SortingSettings = {
+    field: "createdAt",
+    direction: "desc",
+};
+
+// human-readable labels, matching SortingTab's option copy
+const SORT_FIELD_LABELS: Record<Exclude<SortingSettings["field"], "manual">, string> = {
+    createdAt: "Date added",
+    company: "Company",
+    position: "Position",
+};
+
+/**
+ * Sorts jobs for display based on the board's sorting settings.
+ * - "manual": respects the stored drag-order (job.order) — this is the
+ *   only mode where order is ever persisted by user action.
+ * - "createdAt" / "company" / "position": computed on the fly, never
+ *   written back to job.order, so switching back to "manual" later
+ *   restores whatever drag order was last saved underneath.
+ */
+function sortJobs(
+    jobs: JobApplication[],
+    sorting: SortingSettings
+): JobApplication[] {
+    const { field, direction } = sorting;
+    const sorted = [...jobs];
+
+    if (field === "manual") {
+        return sorted.sort((a, b) => a.order - b.order);
+    }
+
+    const dir = direction === "asc" ? 1 : -1;
+
+    sorted.sort((a, b) => {
+        if (field === "createdAt") {
+            const aTime = new Date(a.createdAt).getTime();
+            const bTime = new Date(b.createdAt).getTime();
+            return (aTime - bTime) * dir;
+        }
+        if (field === "company") {
+            return a.company.localeCompare(b.company) * dir;
+        }
+        if (field === "position") {
+            return a.position.localeCompare(b.position) * dir;
+        }
+        return 0;
+    });
+
+    return sorted;
+}
 
 const ICON_MAP: Record<string, React.ReactNode> = {
     Calendar: <Calendar className="h-4 w-4" />,
@@ -61,10 +112,9 @@ const DEFAULT_COLUMN_CONFIG: ColConfig = {
     icon: <Calendar className="h-4 w-4" />,
 };
 
-function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay }: { column: Column, config: ColConfig, boardId: string, sortedColumns: Column[], cardDisplay: CardDisplaySettings }) {
+function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, sorting }: { column: Column, config: ColConfig, boardId: string, sortedColumns: Column[], cardDisplay: CardDisplaySettings, sorting: SortingSettings }) {
     const [showEditColumnDialog, setShowEditColumnDialog] = useState(false);
-    const sortedJobs =
-        column.jobApplications?.sort((a, b) => a.order - b.order) || [];
+    const sortedJobs = sortJobs(column.jobApplications || [], sorting);
 
     const { setNodeRef, isOver } = useDroppable({
         id: column._id,
@@ -181,9 +231,9 @@ function SortableJobCard({ job, columns, cardDisplay }: { job: JobApplication, c
     )
 }
 
-export default function KanbanBoard({ board }: KanbanBoardProps) {
+export default function KanbanBoard({ board: initialBoard }: KanbanBoardProps) {
     const [activeId, setActiveId] = useState<string | null>(null);
-    const { columns, moveJob } = useBoard(board);
+    const { board, columns, moveJob } = useBoard(initialBoard);
     const sortedColumns = columns?.sort((a, b) => a.order - b.order) || [];
 
     const sensors = useSensors(
@@ -195,9 +245,14 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
     );
 
     const cardDisplay: CardDisplaySettings = {
-        showSalary: board.settings?.cardDisplay?.showSalary ?? DEFAULT_CARD_DISPLAY.showSalary,
-        showAppliedDate: board.settings?.cardDisplay?.showAppliedDate ?? DEFAULT_CARD_DISPLAY.showAppliedDate,
-        showTags: board.settings?.cardDisplay?.showTags ?? DEFAULT_CARD_DISPLAY.showTags,
+        showSalary: board?.settings?.cardDisplay?.showSalary ?? DEFAULT_CARD_DISPLAY.showSalary,
+        showAppliedDate: board?.settings?.cardDisplay?.showAppliedDate ?? DEFAULT_CARD_DISPLAY.showAppliedDate,
+        showTags: board?.settings?.cardDisplay?.showTags ?? DEFAULT_CARD_DISPLAY.showTags,
+    };
+
+    const sorting: SortingSettings = {
+        field: board?.settings?.sorting?.field ?? DEFAULT_SORTING.field,
+        direction: board?.settings?.sorting?.direction ?? DEFAULT_SORTING.direction,
     };
 
 
@@ -210,7 +265,7 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
 
         setActiveId(null);
 
-        if (!over || !board._id) return;
+        if (!over || !board?._id) return;
 
         const activeId = active.id as string;
         const overId = over.id as string;
@@ -310,9 +365,21 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="space-y-4 w-full h-full">
+            <div className="flex flex-col gap-4 w-full h-full min-h-0">
+                {sortedColumns.length > 0 && sorting.field !== "manual" && (
+                    <div className="flex items-center gap-1.5 px-2 text-sm text-muted-foreground shrink-0">
+                        <ArrowUpDown className="h-3.5 w-3.5" />
+                        <span className="text-xs">
+                            Sorted by{" "}
+                            <span className="text-xs text-foreground">
+                                {SORT_FIELD_LABELS[sorting.field as Exclude<SortingSettings["field"], "manual">]}
+                            </span>
+                            {sorting.direction === "asc" ? " (A–Z)" : ""}
+                        </span>
+                    </div>
+                )}
                 {sortedColumns.length > 0 ? (
-                    <div className="flex gap-4 overflow-x-auto pb-4 p-2 w-full items-start h-full">
+                    <div className="flex-1 min-h-0 flex gap-4 overflow-x-auto pb-4 p-2 w-full items-start">
                         {sortedColumns.map((col) => {
                             const config: ColConfig = {
                                 color: col.color || DEFAULT_COLUMN_CONFIG.color,
@@ -326,15 +393,16 @@ export default function KanbanBoard({ board }: KanbanBoardProps) {
                                     key={col._id}
                                     column={col}
                                     config={config}
-                                    boardId={board._id}
+                                    boardId={board?._id ?? ""}
                                     sortedColumns={sortedColumns}
                                     cardDisplay={cardDisplay}
+                                    sorting={sorting}
                                 />
                             );
                         })}
                     </div>
                 ) : (
-                    <div className="flex items-center justify-center h-full py-20 text-center">
+                    <div className="flex-1 min-h-0 flex items-center justify-center py-20 text-center">
                         <div>
                             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
                                 No columns found

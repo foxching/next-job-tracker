@@ -22,6 +22,7 @@ export interface JobApplication {
     tags?: string[];
     appliedDate?: string;
     description?: string;
+    createdAt: string
 }
 
 export interface Column {
