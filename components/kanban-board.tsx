@@ -95,7 +95,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay }
 
 
     return (
-        <Card className="min-w-[280px] flex-shrink-0 shadow-md p-0 flex flex-col h-full">
+        <Card className="min-w-[290px] max-w-[290px] flex-shrink-0 shadow-md p-0 flex flex-col h-full">
             <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3 relative`}>
                 <div className=" flex items-center justify-between">
                     <div className="flex items-center gap-2">

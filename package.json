@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed:jobs": "tsx --env-file=.env.local scripts/seed.ts",
-    "migrate:board-settings": "tsx --env-file=.env.local scripts/migrate-board-settings.ts"
+    "migrate:board-settings": "tsx --env-file=.env.local scripts/migrate-board-settings.ts",
+    "migrate:appliedDate": "tsx --env-file=.env.local scripts/migrate-applied-date.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

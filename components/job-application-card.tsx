@@ -24,6 +24,14 @@ interface JobApplicationCardProps {
     cardDisplay: CardDisplaySettings;
 }
 
+function formatAppliedDate(date: string | Date) {
+    return new Date(date).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+    });
+}
+
 export default function JobApplicationCard({ job, columns, dragHandleProps, cardDisplay }: JobApplicationCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
@@ -111,21 +119,36 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
 
     return (
         <>
-            <Card className="w-[320px] min-w-[300px] max-w-[300px] cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm" {...dragHandleProps} onClick={() => setIsDescOpen(true)}>
-                <CardContent className="p-3">
+            <Card
+                className="w-[320px] min-w-[250px] max-w-[250px] cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm"
+                {...dragHandleProps}
+                onClick={() => setIsDescOpen(true)}
+            >
+                <CardContent className="p-2">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm mb-0.5 truncate">{job.position}</h3>
-                            <p className="text-xs text-muted-foreground mb-1 truncate">
+                            <p className="text-xs text-muted-foreground mb-1.5 truncate">
                                 {job.company}
                             </p>
-                            {cardDisplay.showSalary && job.salary && (
-                                <small className="text-xs font-bold text-foreground">{job.salary}</small>
-                            )}
+
+                            <div className="flex flex-col gap-0.5 mb-1">
+                                {cardDisplay.showSalary && job.salary && (
+                                    <span className="text-xs font-bold text-foreground">
+                                        {job.salary}
+                                    </span>
+                                )}
+                                {cardDisplay.showAppliedDate && job.appliedDate && (
+                                    <span className="text-xs text-muted-foreground">
+                                        Applied {formatAppliedDate(job.appliedDate)}
+                                    </span>
+                                )}
+                            </div>
+
                             {cardDisplay.showTags && job.tags && job.tags.length > 0 && (
                                 <div className="mt-2">
-                                    <div className="flex flex-wrap gap-2">
-                                        {(showAllTags ? job.tags : job.tags.slice(0, 3)).map((tag, i) => (
+                                    <div className="flex flex-wrap gap-1">
+                                        {(showAllTags ? job.tags : job.tags.slice(0, 2)).map((tag, i) => (
                                             <span
                                                 key={i}
                                                 className="
@@ -146,7 +169,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                                         ))}
                                     </div>
 
-                                    {job.tags.length > 3 && (
+                                    {job.tags.length > 2 && (
                                         <Button
                                             variant="link"
                                             size="sm"
@@ -158,12 +181,13 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                                         >
                                             {showAllTags
                                                 ? "See less"
-                                                : `See ${job.tags.length - 3} more`}
+                                                : `See ${job.tags.length - 2} more`}
                                         </Button>
                                     )}
                                 </div>
                             )}
                         </div>
+
                         <div className="flex items-start gap-1">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -183,7 +207,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                                                             key={key}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleMove(column._id)
+                                                                handleMove(column._id);
                                                             }}
                                                         >
                                                             <div className="mr-2">
@@ -196,10 +220,12 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                                         )}
                                     </DropdownMenuGroup>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={(e) => {
-                                        e.stopPropagation();
-                                        setIsEditing(true);
-                                    }}>
+                                    <DropdownMenuItem
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsEditing(true);
+                                        }}
+                                    >
                                         <Edit2 className="mr-2 h-4 w-4" />
                                         Edit
                                     </DropdownMenuItem>
@@ -219,7 +245,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                         </div>
                     </div>
                 </CardContent>
-            </Card >
+            </Card>
             <Dialog open={isDescOpen} onOpenChange={setIsDescOpen}>
                 <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
                     <DialogHeader>
