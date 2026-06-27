@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "../auth/auth";
 import connectDB from "../db";
 import { Board, Column, JobApplication } from "../models";
-import { ExportBoardError, ExportBoardResult, ExportedBoard, ExportedJob, ExportedColumn, SortField, DuplicateBoardResult, DuplicateBoardError } from "../models/models.types";
+import { ExportBoardError, ExportBoardResult, ExportedBoard, ExportedJob, ExportedColumn, SortField, DuplicateBoardResult, DuplicateBoardError, DeleteBoardResult, DeleteBoardError } from "../models/models.types";
 import { SortDirection } from "mongodb";
 import mongoose from "mongoose";
 
@@ -517,6 +517,83 @@ export async function duplicateBoardAction(
         mongoSession.endSession();
     }
 
+}
+
+export async function deleteBoardAction(
+    boardId: string
+): Promise<DeleteBoardResult | DeleteBoardError> {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    await connectDB();
+
+    const board = await Board.findOne({
+        _id: boardId,
+        userId: session.user.id,
+    }).lean();
+
+    if (!board) {
+        return { success: false, error: "Board not found." };
+    }
+
+    const boardCount = await Board.countDocuments({
+        userId: session.user.id,
+    });
+
+    if (boardCount <= 1) {
+        return {
+            success: false,
+            error: "You cannot delete this board becase its your last board.",
+        };
+    }
+
+    const nextBoard = await Board.findOne({
+        userId: session.user.id,
+        _id: { $ne: boardId },
+    })
+        .sort({ updatedAt: -1 })
+        .lean();
+
+    const columns = await Column.find({ boardId }, { _id: 1 }).lean();
+    const columnIds = columns.map((col) => col._id);
+
+    const mongoSession = await mongoose.startSession();
+    try {
+        mongoSession.startTransaction();
+
+        if (columnIds.length > 0) {
+            await JobApplication.deleteMany(
+                { columnId: { $in: columnIds } },
+                { session: mongoSession }
+            );
+        }
+
+        await Column.deleteMany({ boardId }, { session: mongoSession });
+        await Board.deleteOne({ _id: boardId }, { session: mongoSession });
+
+        if (nextBoard) {
+            await Board.updateOne(
+                { _id: nextBoard._id },
+                { $set: { isActive: true } },
+                { session: mongoSession }
+            );
+        }
+
+        await mongoSession.commitTransaction();
+
+        revalidatePath("/dashboard");
+
+        return { success: true };
+    } catch (err) {
+        await mongoSession.abortTransaction();
+        console.error("[deleteBoardAction]", err);
+        return { success: false, error: "Something went wrong. Please try again." };
+    } finally {
+        mongoSession.endSession();
+    }
 }
 
 

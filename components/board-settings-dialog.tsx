@@ -245,7 +245,7 @@ export default function BoardSettingsDialog({
                             </TabsContent>
 
                             <TabsContent value="danger" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
-                                <DeleteBoardTab />
+                                <DeleteBoardTab boardId={board._id} boardName={board.name} onClose={onOpenChange} />
                             </TabsContent>
                         </div>
                     </Tabs>

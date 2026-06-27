@@ -130,3 +130,12 @@ export interface DuplicateBoardError {
     success: false;
     error: string;
 }
+
+export interface DeleteBoardResult {
+    success: true;
+}
+
+export interface DeleteBoardError {
+    success: false;
+    error: string;
+}
