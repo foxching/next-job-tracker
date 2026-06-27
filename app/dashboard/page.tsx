@@ -58,8 +58,8 @@ async function DashboardPage() {
 
     return (
         <div className="h-[calc(100vh-5rem)] bg-background text-foreground overflow-hidden">
-            <div className="flex h-full flex-col w-full px-6 py-6">
-                <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="flex h-full flex-col w-full px-2 py-2">
+                <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between px-2">
                     <div className="flex items-center gap-4">
                         {board && <EditableBoardTitle boardId={board._id} initialName={board.name} />}
                         <BoardSwitcher boards={boards} />
