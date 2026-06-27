@@ -145,7 +145,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, 
 
 
     return (
-        <Card className="min-w-[290px] max-w-[290px] flex-shrink-0 shadow-md p-0 flex flex-col h-full">
+        <Card className="min-w-[290px] max-w-[290px] flex-shrink-0 shadow-md p-0 flex flex-col">
             <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3 relative`}>
                 <div className=" flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -171,8 +171,8 @@ function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, 
                     </DropdownMenu>
                 </div>
             </CardHeader>
-            <div className={`flex-1 flex flex-col gap-2 min-h-0 bg-muted/20 rounded-b-lg overflow-hidden ${isOver ? "ring-2 ring-blue-500" : ""}`}>
-                <CardContent ref={setNodeRef} className="flex-1 overflow-y-auto space-y-2 pt-2 pb-2">
+            <div className={`flex flex-col gap-2 min-h-0 bg-muted/20 rounded-b-lg overflow-hidden ${isOver ? "ring-2 ring-blue-500" : ""}`}>
+                <CardContent ref={setNodeRef} className="max-h-[400px] overflow-y-auto space-y-2 pt-2 pb-2">
                     <SortableContext
                         items={sortedJobs.map((job) => job._id)}
                         strategy={verticalListSortingStrategy}
