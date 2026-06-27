@@ -15,7 +15,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-import { exportBoardAction } from "@/lib/actions/board";
+import { duplicateBoardAction, exportBoardAction } from "@/lib/actions/board";
 import * as XLSX from "xlsx-js-style";
 
 interface ActionCardProps {
@@ -140,16 +140,21 @@ const BoardSettingsDataTab = ({ boardId, boardName }: BoardSettingsDataTabProps)
     const handleDuplicate = async () => {
         setDuplicateLoading(true);
         try {
-            // TODO: replace with actual duplicate server action
-            // await duplicateBoard(boardId);
-            await new Promise((r) => setTimeout(r, 1000));
-            toast.success(`"${boardName}" duplicated.`);
+            const result = await duplicateBoardAction(boardId);
+
+            if (!result.success) {
+                toast.error(result.error);
+                return;
+            }
+
+            toast.success(`"${result.boardName}" created.`);
         } catch {
             toast.error("Duplicate failed. Please try again.");
         } finally {
             setDuplicateLoading(false);
         }
     };
+
 
     const handleArchive = async () => {
         setArchiveLoading(true);

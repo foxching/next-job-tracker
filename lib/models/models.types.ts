@@ -119,3 +119,14 @@ export interface ExportBoardError {
     success: false;
     error: string;
 }
+
+export interface DuplicateBoardResult {
+    success: true;
+    boardId: string;
+    boardName: string;
+}
+
+export interface DuplicateBoardError {
+    success: false;
+    error: string;
+}

@@ -41,9 +41,6 @@ export default function BoardMenu({ board }: BoardMenuProps) {
                         <Settings className="mr-2 h-4 w-4" />
                         Board settings
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
-                        Export board
-                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
             {showAddColumnDialog && (

@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { getSession } from "../auth/auth";
 import connectDB from "../db";
 import { Board, Column, JobApplication } from "../models";
-import { ExportBoardError, ExportBoardResult, ExportedBoard, ExportedJob, ExportedColumn, SortField } from "../models/models.types";
+import { ExportBoardError, ExportBoardResult, ExportedBoard, ExportedJob, ExportedColumn, SortField, DuplicateBoardResult, DuplicateBoardError } from "../models/models.types";
 import { SortDirection } from "mongodb";
+import mongoose from "mongoose";
 
 type UpdateBoardDetailsInput = {
     name: string;
@@ -394,3 +395,129 @@ export async function exportBoardAction(
         return { success: false, error: "Something went wrong. Please try again." };
     }
 }
+
+export async function duplicateBoardAction(
+    boardId: string
+): Promise<DuplicateBoardResult | DuplicateBoardError> {
+
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    await connectDB();
+
+    //Fetch source board 
+    const sourceBoard = await Board.findOne({
+        _id: boardId,
+        userId: session.user.id,
+    }).lean();
+
+    if (!sourceBoard) {
+        return { success: false, error: "Board not found." };
+    }
+
+    //Fetch source columns + jobs
+    const sourceColumns = await Column.find({ boardId }).sort({ order: 1 }).lean();
+    const sourceColumnIds = sourceColumns.map((col) => col._id);
+    const sourceJobs = await JobApplication.find({ columnId: { $in: sourceColumnIds } }).lean();
+
+    // Group jobs by their source columnId for easy lookup
+    const jobsByColumn = sourceJobs.reduce<Record<string, typeof sourceJobs>>(
+        (acc, job) => {
+            const key = job.columnId.toString();
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(job);
+            return acc;
+        },
+        {}
+    );
+
+    //Create new board
+    const newBoardId = new mongoose.Types.ObjectId();
+    const clonedBoardName = `${sourceBoard.name} (clone)`;
+
+    type NewColumn = {
+        doc: object;
+        newColId: mongoose.Types.ObjectId;
+        newJobs: object[];
+    };
+
+    const newColumns: NewColumn[] = sourceColumns.map((col) => {
+        const newColId = new mongoose.Types.ObjectId();
+        const colJobs = jobsByColumn[col._id.toString()] ?? [];
+        const newJobIds = colJobs.map(() => new mongoose.Types.ObjectId());
+
+        const newJobs = colJobs.map((job, i) => ({
+            ...job,
+            _id: newJobIds[i],
+            columnId: newColId,
+            boardId: newBoardId,
+            userId: session.user.id,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        }));
+
+        return {
+            newColId,
+            doc: {
+                ...col,
+                _id: newColId,
+                boardId: newBoardId,
+                jobApplications: newJobIds,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            },
+            newJobs,
+        };
+    });
+
+    //Write everything inside a transaction
+    const mongoSession = await mongoose.startSession();
+    try {
+        mongoSession.startTransaction();
+
+        await Board.create(
+            [
+                {
+                    ...sourceBoard,
+                    _id: newBoardId,
+                    name: clonedBoardName,
+                    isActive: true,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
+            ],
+            { session: mongoSession }
+        );
+
+        for (const { doc, newJobs } of newColumns) {
+            await Column.create([doc], { session: mongoSession });
+
+            if (newJobs.length > 0) {
+                await JobApplication.insertMany(newJobs, { session: mongoSession });
+            }
+        }
+
+        await mongoSession.commitTransaction();
+
+        revalidatePath("/dashboard");
+
+        return {
+            success: true,
+            boardId: newBoardId.toString(),
+            boardName: clonedBoardName,
+        };
+    } catch (err) {
+        await mongoSession.abortTransaction();
+        console.error("[duplicateBoardAction]", err);
+        return { success: false, error: "Something went wrong. Please try again." };
+    } finally {
+        mongoSession.endSession();
+    }
+
+}
+
+
+
