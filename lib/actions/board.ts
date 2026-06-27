@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { getSession } from "../auth/auth";
 import connectDB from "../db";
-import { Board } from "../models";
-import { SortField } from "../models/models.types";
+import { Board, Column, JobApplication } from "../models";
+import { ExportBoardError, ExportBoardResult, ExportedBoard, ExportedJob, ExportedColumn, SortField } from "../models/models.types";
 import { SortDirection } from "mongodb";
 
 type UpdateBoardDetailsInput = {
@@ -22,6 +22,15 @@ type UpdateCardDisplayInput = {
 type SortSettingsInput = {
     field: SortField;
     direction: SortDirection;
+};
+
+const formatDate = (date: Date | undefined): string => {
+    if (!date) return "";
+    const d = new Date(date);
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return `${mm}/${dd}/${yyyy}`;
 };
 
 export async function createBoard(name: string) {
@@ -308,5 +317,80 @@ export async function setSortFieldManual(boardId: string) {
     } catch (error) {
         console.error("Error switching board to manual sort:", error);
         return { error: "Failed to switch to manual sort" };
+    }
+}
+
+export async function exportBoardAction(
+    boardId: string
+): Promise<ExportBoardResult | ExportBoardError> {
+    try {
+        const session = await getSession();
+
+        if (!session?.user) {
+            return { success: false, error: "Unauthorized" };
+        }
+
+
+        await connectDB();
+
+        const board = await Board.findOne({
+            _id: boardId,
+            userId: session.user.id,
+        });
+
+        if (!board) {
+            return { success: false, error: "Board not found" };
+        }
+
+        const columns = await Column.find({ boardId }).sort({ order: 1 }).lean();
+
+        const columnIds = columns.map((col) => col._id);
+        const jobs = await JobApplication.find({ columnId: { $in: columnIds } }).lean();
+
+        const jobsByColumn = jobs.reduce<Record<string, ExportedJob[]>>((acc, job) => {
+            const colId = job.columnId.toString();
+            if (!acc[colId]) acc[colId] = [];
+            acc[colId].push({
+                id: job._id.toString(),
+                company: job.company,
+                position: job.position ?? "",
+                location: job.location,
+                salary: job.salary,
+                jobUrl: job.jobUrl,
+                appliedDate: job.appliedDate,
+                tags: job.tags ?? [],
+                notes: job.notes,
+                createdAt: formatDate(job.createdAt),
+                updatedAt: formatDate(job.updatedAt),
+            });
+            return acc;
+        }, {});
+
+        const exportedColumns: ExportedColumn[] = columns.map((col) => ({
+            id: col._id.toString(),
+            name: col.name,
+            order: col.order,
+            jobApplications: jobsByColumn[col._id.toString()] ?? [],
+        }));
+
+        const exportedBoard: ExportedBoard = {
+            id: board._id.toString(),
+            name: board.name,
+            description: board.description,
+            exportedAt: new Date().toISOString(),
+            columns: exportedColumns,
+        };
+
+        const slug = board.name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/(^-|-$)/g, "");
+        const date = new Date().toISOString().slice(0, 10);
+        const filename = `${slug}-${date}.json`;
+
+        return { success: true, data: exportedBoard, filename };
+    } catch (err) {
+        console.error("[exportBoardAction]", err);
+        return { success: false, error: "Something went wrong. Please try again." };
     }
 }

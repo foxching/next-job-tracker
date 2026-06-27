@@ -15,6 +15,9 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+import { exportBoardAction } from "@/lib/actions/board";
+import * as XLSX from "xlsx-js-style";
+
 interface ActionCardProps {
     icon: React.ReactNode;
     iconClass: string;
@@ -67,16 +70,66 @@ const BoardSettingsDataTab = ({ boardId, boardName }: BoardSettingsDataTabProps)
     const handleExport = async () => {
         setExportLoading(true);
         try {
-            // TODO: replace with actual export server action / API call
-            // const data = await exportBoard(boardId);
-            // const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
-            // const url = URL.createObjectURL(blob);
-            // const a = document.createElement("a");
-            // a.href = url;
-            // a.download = `${boardName}.json`;
-            // a.click();
-            await new Promise((r) => setTimeout(r, 1000)); // remove once wired up
-            toast.success("Board exported successfully.");
+            const result = await exportBoardAction(boardId);
+
+            if (!result.success) {
+                toast.error(result.error);
+                return;
+            }
+
+            const wb = XLSX.utils.book_new();
+
+            // One sheet per column
+            for (const column of result.data.columns) {
+                const rows = column.jobApplications.map((job) => ({
+                    Company: job.company ?? "",
+                    Position: job.position,
+                    Location: job.location,
+                    Salary: job.salary ?? "",
+                    "Job URL": job.jobUrl ?? "",
+                    "Applied Date": job.appliedDate,
+                    Tags: (job.tags ?? []).join(", "),
+                    Notes: job.notes ?? "",
+                    "Created At": job.createdAt,
+                    "Updated At": job.updatedAt,
+                }));
+
+                const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{}]);
+
+                // Bold header row
+                const range = XLSX.utils.decode_range(ws["!ref"] ?? "A1");
+                for (let col = range.s.c; col <= range.e.c; col++) {
+                    const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+                    if (ws[cellRef]) {
+                        ws[cellRef].s = {
+                            font: { bold: true },
+                            fill: { fgColor: { rgb: "F3F4F6" } },
+                        };
+                    }
+                }
+
+                ws["!cols"] = [
+                    { wch: 20 }, // Company
+                    { wch: 30 }, // Position
+                    { wch: 20 }, // Location
+                    { wch: 15 }, // Salary
+                    { wch: 35 }, // Job URL
+                    { wch: 15 }, // Applied Date
+                    { wch: 20 }, // Tags
+                    { wch: 40 }, // Notes
+                    { wch: 20 }, // Created At
+                    { wch: 20 }, // Updated At
+                ];
+
+                // Sheet name max 31 chars, strip invalid chars
+                const sheetName = column.name.replace(/[:\\/?*[\]]/g, "").slice(0, 31);
+                XLSX.utils.book_append_sheet(wb, ws, sheetName);
+            }
+
+            const filename = result.filename.replace(".json", ".xlsx");
+            XLSX.writeFile(wb, filename);
+
+            toast.success("Board exported.");
         } catch {
             toast.error("Export failed. Please try again.");
         } finally {

@@ -77,3 +77,45 @@ export type SortingFormValues = {
     field: "createdAt" | "company" | "position" | "manual";
     direction: "asc" | "desc";
 };
+
+//export types
+export interface ExportedJob {
+    id: string;
+    company?: string;
+    position: string;
+    location: string;
+    salary?: string;
+    jobUrl?: string;
+    appliedDate: string;
+    tags?: string[];
+    notes?: string;
+    createdAt: string;
+    updatedAt: string;
+    [key: string]: unknown;
+}
+
+export interface ExportedColumn {
+    id: string;
+    name: string;
+    order: number;
+    jobApplications: ExportedJob[];
+}
+
+export interface ExportedBoard {
+    id: string;
+    name: string;
+    description?: string;
+    exportedAt: string;
+    columns: ExportedColumn[];
+}
+
+export interface ExportBoardResult {
+    success: true;
+    data: ExportedBoard;
+    filename: string;
+}
+
+export interface ExportBoardError {
+    success: false;
+    error: string;
+}
