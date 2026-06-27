@@ -243,7 +243,7 @@ export default function BoardSettingsDialog({
                             </TabsContent>
 
                             <TabsContent value="data" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
-                                <DataTab />
+                                <DataTab boardId={board._id} boardName={board.name} />
                             </TabsContent>
 
                             <TabsContent value="danger" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
@@ -252,7 +252,7 @@ export default function BoardSettingsDialog({
                         </div>
                     </Tabs>
 
-                    <DialogFooter className="px-6 py-4 border-t">
+                    <DialogFooter className="px-6 py-4 border-t pb-4">
                         <Button variant="outline" onClick={() => handleOpenChange(false)}>
                             Cancel
                         </Button>
