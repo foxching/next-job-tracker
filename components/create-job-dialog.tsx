@@ -15,6 +15,7 @@ import { useState } from "react";
 import { createJobApplication } from "@/lib/actions/job-application";
 import { toast } from "sonner";
 import JobApplicationForm from "./form/job-application-form";
+import { useBoardContext } from "./board-provider";
 
 interface CreateJobApplicationDialogProps {
     columnId: string;
@@ -37,6 +38,7 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
     const [open, setOpen] = useState(false);
     const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { addJob } = useBoardContext();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -57,12 +59,17 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                 return;
             }
 
+            if (result.data) {
+                addJob(result.data);
+            }
+
             setFormData(INITIAL_FORM_DATA);
             setOpen(false);
-            setIsSubmitting(false);
             toast.success("Job application created successfully!");
         } catch {
             toast.error("An error occurred while creating the job application.");
+        } finally {
+            setIsSubmitting(false);
         }
     }
     return (

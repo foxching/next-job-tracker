@@ -2,7 +2,7 @@
 
 import { Column, JobApplication } from "@/lib/models/models.types";
 import { Card, CardContent } from "./ui/card";
-import { Award, Calendar, CheckCircle2, Edit2, ExternalLink, Eye, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { Award, Calendar, CheckCircle2, Edit2, ExternalLink, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-application";
@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { toast } from "sonner";
 import JobApplicationForm, { JobApplicationFormData } from "./form/job-application-form";
+import { useBoardContext } from "./board-provider";
 
 type CardDisplaySettings = {
     showSalary: boolean;
@@ -51,6 +52,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
             description: job.description || "",
         });
     const [showAllTags, setShowAllTags] = useState(false);
+    const { updateJob, removeJob, moveJob } = useBoardContext();
 
     async function handleUpdate(e: React.FormEvent) {
         e.preventDefault();
@@ -69,11 +71,15 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                 return;
             }
 
+            if (result.data) {
+                updateJob(result.data);
+            }
+
             setIsEditing(false);
-            setIsUpdating(false);
             toast.success("Job application updated successfully!");
         } catch {
             toast.error("Failed to update job application.");
+        } finally {
             setIsUpdating(false);
         }
     }
@@ -87,26 +93,15 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                 return;
             }
 
+            removeJob(job._id);
             toast.success("Job application deleted successfully!");
         } catch {
             toast.error("An error occurred while deleting the job application.");
         }
     }
     async function handleMove(newColumnId: string) {
-        try {
-            const result = await updateJobApplication(job._id, {
-                columnId: newColumnId,
-            });
-
-            if (result.error) {
-                toast.error("Failed to move the job application.");
-                return;
-            }
-
-            toast.success("Job application moved successfully!");
-        } catch {
-            toast.error("An error occurred while moving the job application.");
-        }
+        const targetColumn = columns.find((column) => column._id === newColumnId);
+        await moveJob(job._id, newColumnId, targetColumn?.jobApplications.length ?? 0);
     }
 
     const ICON_MAP: Record<string, React.ReactNode> = {

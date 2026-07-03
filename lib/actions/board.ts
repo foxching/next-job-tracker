@@ -96,13 +96,22 @@ export async function updateBoardName(boardId: string, name: string) {
     }
 
     try {
-        await Board.findByIdAndUpdate(boardId, {
-            name: name.trim(),
+        const updatedBoard = await Board.findByIdAndUpdate(
+            boardId,
+            {
+                name: name.trim(),
+            },
+            { new: true }
+        ).populate({
+            path: "columns",
+            populate: {
+                path: "jobApplications",
+            },
         });
 
         revalidatePath("/dashboard");
 
-        return { success: true };
+        return { success: true, board: JSON.parse(JSON.stringify(updatedBoard)) };
     } catch (error) {
         console.error("Error updating board name:", error);
         return { error: "Failed to update board name" };
@@ -148,12 +157,9 @@ export async function updateBoardDetails(
             }
         );
 
-        console.log(updatedBoard);
-
-
         revalidatePath("/dashboard");
 
-        return { success: true };
+        return { success: true, board: JSON.parse(JSON.stringify(updatedBoard)) };
     } catch (error) {
         console.error("Error updating board details:", error);
         return { error: "Failed to update board details" };
@@ -314,7 +320,7 @@ export async function setSortFieldManual(boardId: string) {
 
         revalidatePath("/dashboard");
 
-        return { success: true };
+        return { success: true, board: JSON.parse(JSON.stringify(updatedBoard)) };
     } catch (error) {
         console.error("Error switching board to manual sort:", error);
         return { error: "Failed to switch to manual sort" };

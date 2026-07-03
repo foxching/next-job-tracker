@@ -26,13 +26,10 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useState } from "react";
-import { useBoard } from "@/lib/hooks/useBoard";
 import { deleteColumn } from "@/lib/actions/column";
 import { toast } from "sonner";
+import { useBoardContext } from "./board-provider";
 
-interface KanbanBoardProps {
-    board: Board;
-}
 interface ColConfig {
     color: string;
     icon: React.ReactNode;
@@ -114,6 +111,7 @@ const DEFAULT_COLUMN_CONFIG: ColConfig = {
 
 function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, sorting }: { column: Column, config: ColConfig, boardId: string, sortedColumns: Column[], cardDisplay: CardDisplaySettings, sorting: SortingSettings }) {
     const [showEditColumnDialog, setShowEditColumnDialog] = useState(false);
+    const { removeColumn } = useBoardContext();
     const sortedJobs = sortJobs(column.jobApplications || [], sorting);
 
     const { setNodeRef, isOver } = useDroppable({
@@ -135,6 +133,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, 
             if (result.error) {
                 toast.error("Failed to delete column.");
             } else {
+                removeColumn(column._id);
                 toast.success("Column deleted successfully.");
             }
         } catch {
@@ -231,10 +230,10 @@ function SortableJobCard({ job, columns, cardDisplay }: { job: JobApplication, c
     )
 }
 
-export default function KanbanBoard({ board: initialBoard }: KanbanBoardProps) {
+export default function KanbanBoard() {
     const [activeId, setActiveId] = useState<string | null>(null);
-    const { board, columns, moveJob } = useBoard(initialBoard);
-    const sortedColumns = columns?.sort((a, b) => a.order - b.order) || [];
+    const { board, columns, moveJob } = useBoardContext();
+    const sortedColumns = [...(columns || [])].sort((a, b) => a.order - b.order);
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -276,7 +275,7 @@ export default function KanbanBoard({ board: initialBoard }: KanbanBoardProps) {
 
         for (const column of sortedColumns) {
             const jobs =
-                column.jobApplications.sort((a, b) => a.order - b.order) || [];
+                [...(column.jobApplications || [])].sort((a, b) => a.order - b.order);
             const jobIndex = jobs.findIndex((j) => j._id === activeId);
             if (jobIndex !== -1) {
                 draggedJob = jobs[jobIndex];
@@ -318,7 +317,7 @@ export default function KanbanBoard({ board: initialBoard }: KanbanBoardProps) {
             if (!targetColumnObj) return;
 
             const allJobsInTargetOriginal =
-                targetColumnObj.jobApplications.sort((a, b) => a.order - b.order) || [];
+                [...(targetColumnObj.jobApplications || [])].sort((a, b) => a.order - b.order);
 
             const allJobsInTargetFiltered =
                 allJobsInTargetOriginal.filter((j) => j._id !== activeId) || [];

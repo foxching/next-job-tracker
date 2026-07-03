@@ -1,15 +1,11 @@
-import KanbanBoard from "@/components/kanban-board";
 import { DashboardSkeleton } from "@/components/skeleton/DashboardSkeleton";
-import { Button } from "@/components/ui/button";
-import EditableBoardTitle from "@/components/editable-board-title";
-import BoardMenu from "@/components/board-menu";
-import { Plus } from "lucide-react";
 import { getSession } from "@/lib/auth/auth";
 import connectDB from "@/lib/db";
 import { Board } from "@/lib/models";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import BoardSwitcher from "@/components/board-swticher";
+import DashboardBoardShell from "@/components/dashboard-board-shell";
 
 async function getBoard(userId: string) {
     await connectDB();
@@ -59,22 +55,20 @@ async function DashboardPage() {
     return (
         <div className="h-[calc(100vh-5rem)] bg-background text-foreground overflow-x-auto overflow-y-hidden">
             < div className="flex h-full flex-col w-full px-2 py-2" >
-                <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between px-2">
-                    <div className="flex items-center gap-4">
-                        {board && <EditableBoardTitle boardId={board._id} initialName={board.name} />}
-                        <BoardSwitcher boards={boards} />
-                    </div>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <BoardMenu board={board} />
-                        <Button>
-                            <Plus className="mr-2 h-4 w-4" />
-                            New application
-                        </Button>
-                    </div>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                    {board ? <KanbanBoard board={board} /> : <div className="flex items-center justify-center h-full text-muted-foreground">No board found</div>}
-                </div>
+                {board ? (
+                    <DashboardBoardShell board={board} boards={boards} />
+                ) : (
+                    <>
+                        <div className="mb-6 flex items-center justify-between px-2">
+                            <BoardSwitcher boards={boards} />
+                        </div>
+                        <div className="flex-1 overflow-hidden">
+                            <div className="flex items-center justify-center h-full text-muted-foreground">
+                                No board found
+                            </div>
+                        </div>
+                    </>
+                )}
             </div >
         </div >
     )

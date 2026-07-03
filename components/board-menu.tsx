@@ -11,15 +11,12 @@ import {
 import { useState } from "react";
 import CreateColumnDialog from "./create-column-dialog";
 import BoardSettingsDialog from "./board-settings-dialog";
-import { Board } from "@/lib/models/models.types";
+import { useBoardContext } from "./board-provider";
 
-interface BoardMenuProps {
-    board: Board;
-}
-
-export default function BoardMenu({ board }: BoardMenuProps) {
+export default function BoardMenu() {
     const [showAddColumnDialog, setShowAddColumnDialog] = useState(false);
     const [showBoardSettingsDialog, setShowBoardSettingsDialog] = useState(false);
+    const { board } = useBoardContext();
 
 
     return (

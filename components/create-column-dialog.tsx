@@ -11,11 +11,11 @@ import {
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createColumn, updateColumn } from "@/lib/actions/column";
 import { Column } from "@/lib/models/models.types";
 import { toast } from "sonner";
+import { useBoardContext } from "./board-provider";
 import {
     Award,
     Calendar,
@@ -58,7 +58,7 @@ export default function CreateColumnDialog({
     const [icon, setIcon] = useState(column ? column.icon || "Calendar" : "Calendar");
     const [color, setColor] = useState(column ? column.color || "bg-cyan-500" : "bg-cyan-500");
     const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
+    const { addColumn, updateColumn: updateColumnState } = useBoardContext();
 
     const isEditMode = Boolean(column);
 
@@ -109,8 +109,15 @@ export default function CreateColumnDialog({
                 return;
             }
 
+            if (result.column) {
+                if (isEditMode) {
+                    updateColumnState(result.column);
+                } else {
+                    addColumn(result.column);
+                }
+            }
+
             handleOpenChange(false);
-            router.refresh();
             toast.success(isEditMode ? "Column updated successfully!" : "Column created successfully!");
         } catch (error) {
             toast.error(

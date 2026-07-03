@@ -51,7 +51,7 @@ export async function createColumn(boardId: string, name: string, icon: string, 
 
     revalidatePath("/dashboard");
 
-    return { success: true };
+    return { success: true, column: JSON.parse(JSON.stringify(newColumn)) };
 }
 
 export async function updateColumn(columnId: string, name: string, icon: string, color: string) {
@@ -82,15 +82,19 @@ export async function updateColumn(columnId: string, name: string, icon: string,
         return { error: "Unauthorized" };
     }
 
-    await Column.findByIdAndUpdate(columnId, {
-        name: name.trim(),
-        icon,
-        color,
-    });
+    const updatedColumn = await Column.findByIdAndUpdate(
+        columnId,
+        {
+            name: name.trim(),
+            icon,
+            color,
+        },
+        { new: true }
+    ).populate("jobApplications");
 
     revalidatePath("/dashboard");
 
-    return { success: true };
+    return { success: true, column: JSON.parse(JSON.stringify(updatedColumn)) };
 }
 
 export async function deleteColumn(columnId: string) {
@@ -140,7 +144,7 @@ export async function deleteColumn(columnId: string) {
 
     revalidatePath("/dashboard");
 
-    return { success: true };
+    return { success: true, columnId };
 }
 
 export async function bulkUpdateColumnNames(updates: ColumnNameUpdate[]) {

@@ -15,6 +15,7 @@ interface JobApplicationData {
     columnId: string;
     boardId: string;
     tags?: string[];
+    appliedDate?: string;
     description?: string;
 }
 
@@ -36,6 +37,7 @@ export async function createJobApplication(data: JobApplicationData) {
         columnId,
         boardId,
         tags,
+        appliedDate,
         description,
     } = data;
 
@@ -79,6 +81,7 @@ export async function createJobApplication(data: JobApplicationData) {
         boardId,
         userId: session.user.id,
         tags: tags || [],
+        appliedDate: appliedDate || undefined,
         description,
         status: "applied",
         order: maxOrder ? maxOrder.order + 1 : 0,
@@ -105,6 +108,7 @@ export async function updateJobApplication(id: string, updates: {
     order?: number;
     tags?: string[];
     description?: string;
+    appliedDate?: string;
 }) {
     const session = await getSession();
 
@@ -134,6 +138,7 @@ export async function updateJobApplication(id: string, updates: {
         order: number;
         tags: string[];
         description: string;
+        appliedDate: string;
     }> = otherUpdates;
 
     const currentColumnId = jobApplication.columnId.toString();

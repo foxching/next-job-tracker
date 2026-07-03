@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { updateBoardName } from "@/lib/actions/board";
 import { toast } from "sonner";
+import { useBoardContext } from "./board-provider";
 
 interface EditableBoardTitleProps {
     boardId: string;
@@ -14,6 +15,7 @@ export default function EditableBoardTitle({ boardId, initialName }: EditableBoa
     const [name, setName] = useState(initialName);
     const [isSaving, setIsSaving] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+    const { patchBoard } = useBoardContext();
 
     useEffect(() => {
         if (isEditing && inputRef.current) {
@@ -21,10 +23,6 @@ export default function EditableBoardTitle({ boardId, initialName }: EditableBoa
             inputRef.current.select();
         }
     }, [isEditing]);
-
-    useEffect(() => {
-        setName(initialName);
-    }, [initialName]);
 
     async function handleSave() {
         if (name.trim() === "") {
@@ -46,9 +44,10 @@ export default function EditableBoardTitle({ boardId, initialName }: EditableBoa
                 toast.error(result.error);
                 setName(initialName);
             } else {
+                patchBoard({ name: name.trim() });
                 toast.success("Board name updated successfully");
             }
-        } catch (error) {
+        } catch {
             toast.error("Failed to update board name");
             setName(initialName);
         } finally {

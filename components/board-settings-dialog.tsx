@@ -31,6 +31,7 @@ import { bulkUpdateColumnNames, deleteColumn } from "@/lib/actions/column";
 import SortingTab from "./board-settings/sorting-tab";
 import DataTab from "./board-settings/data-tab";
 import DeleteBoardTab from "./board-settings/delete-board-tab";
+import { useBoardContext } from "./board-provider";
 
 type BoardSettingsDialogProps = {
     board: Board;
@@ -52,6 +53,7 @@ export default function BoardSettingsDialog({
     open,
     onOpenChange,
 }: BoardSettingsDialogProps) {
+    const { patchBoard, setBoard, setColumns, removeColumn } = useBoardContext();
     const [selectedTab, setSelectedTab] = useState<string>("general");
     const [isSaving, setIsSaving] = useState(false);
 
@@ -83,6 +85,7 @@ export default function BoardSettingsDialog({
             toast.error("Failed to delete column.");
         } else {
             toast.success("Column deleted.");
+            removeColumn(columnId);
             setColumnValues((prev) => {
                 const next = { ...prev };
                 delete next[columnId];
@@ -122,15 +125,37 @@ export default function BoardSettingsDialog({
         setIsSaving(true);
         try {
             if (selectedTab === "general") {
-                await updateBoardDetails(board._id, {
+                const result = await updateBoardDetails(board._id, {
                     name: generalValues.name,
                     description: generalValues.description,
+                    themeColor: generalValues.themeColor,
+                });
+                if (result?.error) {
+                    toast.error(result.error);
+                    setIsSaving(false);
+                    return;
+                }
+                patchBoard({
+                    name: generalValues.name.trim(),
+                    description: generalValues.description.trim(),
                     themeColor: generalValues.themeColor,
                 });
                 toast.success("Board details updated");
             }
             if (selectedTab === "cards") {
-                await updateCardDisplaySettings(board._id, cardDisplayValues);
+                const result = await updateCardDisplaySettings(board._id, cardDisplayValues);
+                if (result?.error) {
+                    toast.error(result.error);
+                    setIsSaving(false);
+                    return;
+                }
+                setBoard((prev) => ({
+                    ...prev,
+                    settings: {
+                        ...prev.settings,
+                        cardDisplay: cardDisplayValues,
+                    },
+                }));
                 toast.success("Card Display settings updated");
             }
             if (selectedTab === "columns") {
@@ -152,11 +177,44 @@ export default function BoardSettingsDialog({
                         setIsSaving(false);
                         return; // don't close the dialog on partial/failed save
                     }
+                    const changedById = new Map(
+                        changedUpdates.map((update) => [
+                            update.columnId,
+                            update.name.trim(),
+                        ])
+                    );
+                    setColumns((prev) =>
+                        prev.map((column) =>
+                            changedById.has(column._id)
+                                ? { ...column, name: changedById.get(column._id)! }
+                                : column
+                        )
+                    );
+                    setBoard((prev) => ({
+                        ...prev,
+                        columns: prev.columns.map((column) =>
+                            changedById.has(column._id)
+                                ? { ...column, name: changedById.get(column._id)! }
+                                : column
+                        ),
+                    }));
                 }
                 toast.success("columns settings updated");
             }
             if (selectedTab === "sorting") {
-                await updateSortSettings(board._id, sortingValues);
+                const result = await updateSortSettings(board._id, sortingValues);
+                if (result?.error) {
+                    toast.error(result.error);
+                    setIsSaving(false);
+                    return;
+                }
+                setBoard((prev) => ({
+                    ...prev,
+                    settings: {
+                        ...prev.settings,
+                        sorting: sortingValues,
+                    },
+                }));
                 toast.success("Sortsettings updated");
             }
             onOpenChange(false);
