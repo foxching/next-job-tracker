@@ -8,17 +8,31 @@ import {
     useMemo,
     useRef,
     useState,
+    useTransition,
 } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { setSortFieldManual } from "@/lib/actions/board";
+import {
+    createBoard as createBoardAction,
+    setActiveBoard,
+    setSortFieldManual,
+} from "@/lib/actions/board";
 import { updateJobApplication } from "@/lib/actions/job-application";
 import { Board, Column, JobApplication } from "@/lib/models/models.types";
 
 type BoardContextValue = {
     board: Board;
+    boards: Board[];
     columns: Column[];
+    isSwitchingBoard: boolean;
     setBoard: React.Dispatch<React.SetStateAction<Board>>;
+    setBoards: React.Dispatch<React.SetStateAction<Board[]>>;
     setColumns: React.Dispatch<React.SetStateAction<Column[]>>;
+    switchBoard: (boardId: string) => Promise<void>;
+    createActiveBoard: (name: string) => Promise<
+        | { success: true; boardId?: string; boardName?: string }
+        | { error: string }
+    >;
     addColumn: (column: Column) => void;
     updateColumn: (column: Column) => void;
     removeColumn: (columnId: string) => void;
@@ -93,13 +107,19 @@ function reorderColumns(
 
 export function BoardProvider({
     initialBoard,
+    initialBoards = [],
     children,
 }: {
     initialBoard: Board;
+    initialBoards?: Board[];
     children: React.ReactNode;
 }) {
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
     const [board, setBoard] = useState<Board>(initialBoard);
+    const [boards, setBoards] = useState<Board[]>(initialBoards);
     const [columns, setColumns] = useState<Column[]>(initialBoard.columns || []);
+    const [isRefreshingBoard, setIsRefreshingBoard] = useState(false);
     const boardWithColumns = useMemo(
         () => ({
             ...board,
@@ -124,6 +144,99 @@ export function BoardProvider({
             ...updates,
         }));
     }, []);
+
+    const refreshDashboard = useCallback(() => {
+        setIsRefreshingBoard(true);
+        startTransition(() => {
+            router.refresh();
+        });
+    }, [router]);
+
+    const switchBoard = useCallback(
+        async (boardId: string) => {
+            if (boardRef.current._id === boardId) {
+                return;
+            }
+
+            setBoards((prev) =>
+                prev.map((current) => ({
+                    ...current,
+                    isActive: current._id === boardId,
+                }))
+            );
+            setIsRefreshingBoard(true);
+
+            try {
+                const result = await setActiveBoard(boardId);
+
+                if (result?.error) {
+                    setBoards((prev) =>
+                        prev.map((current) => ({
+                            ...current,
+                            isActive: current._id === boardRef.current._id,
+                        }))
+                    );
+                    setIsRefreshingBoard(false);
+                    toast.error(result.error);
+                    return;
+                }
+
+                refreshDashboard();
+            } catch (err) {
+                console.error("Error switching board", err);
+                setBoards((prev) =>
+                    prev.map((current) => ({
+                        ...current,
+                        isActive: current._id === boardRef.current._id,
+                    }))
+                );
+                setIsRefreshingBoard(false);
+                toast.error("Failed to switch board.");
+            }
+        },
+        [refreshDashboard]
+    );
+
+    const createActiveBoard = useCallback(
+        async (name: string) => {
+            setIsRefreshingBoard(true);
+
+            try {
+                const result = await createBoardAction(name);
+
+                if (result.error) {
+                    setIsRefreshingBoard(false);
+                    return { error: result.error };
+                }
+
+                setBoards((prev) => [
+                    ...prev.map((current) => ({
+                        ...current,
+                        isActive: false,
+                    })),
+                    {
+                        _id: result.boardId ?? "",
+                        name: result.boardName ?? name.trim(),
+                        columns: [],
+                        isActive: true,
+                    },
+                ]);
+
+                refreshDashboard();
+
+                return {
+                    success: true as const,
+                    boardId: result.boardId,
+                    boardName: result.boardName,
+                };
+            } catch (err) {
+                console.error("Error creating board", err);
+                setIsRefreshingBoard(false);
+                return { error: "Failed to create board" };
+            }
+        },
+        [refreshDashboard]
+    );
 
     const addColumn = useCallback((column: Column) => {
         setColumns((prev) => [...prev, column]);
@@ -258,9 +371,14 @@ export function BoardProvider({
     const value = useMemo(
         () => ({
             board: boardWithColumns,
+            boards,
             columns,
+            isSwitchingBoard: isRefreshingBoard || isPending,
             setBoard,
+            setBoards,
             setColumns,
+            switchBoard,
+            createActiveBoard,
             addColumn,
             updateColumn,
             removeColumn,
@@ -274,11 +392,16 @@ export function BoardProvider({
             addColumn,
             addJob,
             boardWithColumns,
+            boards,
             columns,
+            createActiveBoard,
+            isPending,
+            isRefreshingBoard,
             moveJob,
             patchBoard,
             removeColumn,
             removeJob,
+            switchBoard,
             updateColumn,
             updateJob,
         ]
@@ -297,4 +420,8 @@ export function useBoardContext() {
     }
 
     return context;
+}
+
+export function useOptionalBoardContext() {
+    return useContext(BoardContext);
 }

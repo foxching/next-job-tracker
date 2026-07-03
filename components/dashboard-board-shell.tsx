@@ -10,11 +10,14 @@ import KanbanBoard from "./kanban-board";
 import { Button } from "./ui/button";
 
 function DashboardBoardContent({ boards }: { boards: Board[] }) {
-    const { board } = useBoardContext();
+    const { board, isSwitchingBoard } = useBoardContext();
 
     return (
         <>
-            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between px-2">
+            <div
+                className={`mb-6 flex flex-col gap-4 px-2 transition-opacity duration-200 ease-out md:flex-row md:items-end md:justify-between ${isSwitchingBoard ? "opacity-60" : "opacity-100"
+                    }`}
+            >
                 <div className="flex items-center gap-4">
                     <EditableBoardTitle
                         key={`${board._id}-${board.name}`}
@@ -31,7 +34,10 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
                     </Button>
                 </div>
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div
+                className={`flex-1 overflow-hidden transition-all duration-300 ease-out ${isSwitchingBoard ? "translate-y-1 opacity-40" : "translate-y-0 opacity-100"
+                    }`}
+            >
                 <KanbanBoard />
             </div>
         </>
@@ -46,7 +52,7 @@ export default function DashboardBoardShell({
     boards: Board[];
 }) {
     return (
-        <BoardProvider key={board._id} initialBoard={board}>
+        <BoardProvider key={board._id} initialBoard={board} initialBoards={boards}>
             <DashboardBoardContent boards={boards} />
         </BoardProvider>
     );

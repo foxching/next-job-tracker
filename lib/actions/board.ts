@@ -57,11 +57,20 @@ export async function createBoard(name: string) {
         return { error: "A board with this name already exists" };
     }
 
+    await Board.updateMany(
+        {
+            userId: session.user.id,
+        },
+        {
+            isActive: false,
+        }
+    );
+
     const newBoard = new Board({
         name: name.trim(),
         userId: session.user.id,
         columns: [],
-        isActive: false,
+        isActive: true,
     });
 
     await newBoard.save();
@@ -70,6 +79,8 @@ export async function createBoard(name: string) {
 
     return {
         success: true,
+        boardId: newBoard._id.toString(),
+        boardName: newBoard.name,
     };
 }
 
@@ -483,6 +494,16 @@ export async function duplicateBoardAction(
     const mongoSession = await mongoose.startSession();
     try {
         mongoSession.startTransaction();
+
+        await Board.updateMany(
+            {
+                userId: session.user.id,
+            },
+            {
+                isActive: false,
+            },
+            { session: mongoSession }
+        );
 
         await Board.create(
             [
