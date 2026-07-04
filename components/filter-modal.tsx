@@ -73,20 +73,24 @@ export default function FilterModal({
                         </div>
                     </div>
 
-                    <div>
-                        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Salary</label>
-                        <select className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm mt-2" value={filters.hasSalary} onChange={(e) => setFilters({ ...filters, hasSalary: e.target.value })}>
-                            <option value="all">Any salary</option>
-                            <option value="with-salary">With salary</option>
-                            <option value="without-salary">Without salary</option>
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Salary</label>
+                            <select className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm mt-2" value={filters.hasSalary} onChange={(e) => setFilters({ ...filters, hasSalary: e.target.value })}>
+                                <option value="all">Any salary</option>
+                                <option value="with-salary">With salary</option>
+                                <option value="without-salary">Without salary</option>
+                            </select>
+                        </div>
 
-                        <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mt-4 block">Notes</label>
-                        <select className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm mt-2" value={filters.hasNotes} onChange={(e) => setFilters({ ...filters, hasNotes: e.target.value })}>
-                            <option value="all">Any notes</option>
-                            <option value="with-notes">With notes</option>
-                            <option value="without-notes">Without notes</option>
-                        </select>
+                        <div>
+                            <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground block">Notes</label>
+                            <select className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm mt-2" value={filters.hasNotes} onChange={(e) => setFilters({ ...filters, hasNotes: e.target.value })}>
+                                <option value="all">Any notes</option>
+                                <option value="with-notes">With notes</option>
+                                <option value="without-notes">Without notes</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
