@@ -13,6 +13,7 @@ import { User } from 'lucide-react';
 import PersonalInformation from "./profile-tabs/personal-information";
 import Security from "./profile-tabs/security";
 import Settings from "./profile-tabs/settings";
+import BillingTab from "./profile-tabs/billing";
 
 type ProfileContentProps = {
     session?: {
@@ -75,6 +76,13 @@ export default function ProfileContent({
                                     Settings
                                 </TabsTrigger>
 
+                                <TabsTrigger
+                                    value="billing"
+                                    className="w-full justify-start"
+                                >
+                                    Billing
+                                </TabsTrigger>
+
                             </TabsList>
                         </div>
 
@@ -97,6 +105,10 @@ export default function ProfileContent({
 
                             <TabsContent value="settings">
                                 <Settings />
+                            </TabsContent>
+
+                            <TabsContent value="billing">
+                                <BillingTab />
                             </TabsContent>
 
                         </div>
