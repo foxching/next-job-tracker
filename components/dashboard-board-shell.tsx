@@ -1,16 +1,26 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Filter } from "lucide-react";
 import { Board } from "@/lib/models/models.types";
 import { BoardProvider, useBoardContext } from "./board-provider";
 import BoardMenu from "./board-menu";
 import BoardSwitcher from "./board-swticher";
 import EditableBoardTitle from "./editable-board-title";
 import KanbanBoard from "./kanban-board";
+import FilterModal from "./filter-modal";
 import { Button } from "./ui/button";
+import { useState } from "react";
 
 function DashboardBoardContent({ boards }: { boards: Board[] }) {
-    const { board, isSwitchingBoard } = useBoardContext();
+    const { board, isSwitchingBoard, columns } = useBoardContext();
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [filters, setFilters] = useState({
+        query: "",
+        selectedColumns: [] as string[],
+        selectedTags: [] as string[],
+        hasSalary: "all" as "all" | "with-salary" | "without-salary",
+        hasNotes: "all" as "all" | "with-notes" | "without-notes",
+    });
 
     return (
         <>
@@ -28,6 +38,10 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <BoardMenu />
+                    <Button variant="outline" onClick={() => setIsFilterOpen(true)}>
+                        <Filter className="mr-2 h-4 w-4" />
+                        Filters
+                    </Button>
                     <Button>
                         <Plus className="mr-2 h-4 w-4" />
                         New application
@@ -38,8 +52,10 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
                 className={`flex-1 overflow-hidden transition-all duration-300 ease-out ${isSwitchingBoard ? "translate-y-1 opacity-40" : "translate-y-0 opacity-100"
                     }`}
             >
-                <KanbanBoard />
+                <KanbanBoard externalFilters={filters} setExternalFilters={setFilters} />
             </div>
+
+            <FilterModal open={isFilterOpen} onOpenChange={setIsFilterOpen} columns={columns} filters={filters} setFilters={setFilters} />
         </>
     );
 }
