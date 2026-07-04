@@ -21,6 +21,7 @@ import {
     Trash2,
 } from "lucide-react";
 import GeneralTab from "./board-settings/general-tab";
+import InsightsTab from "./board-settings/insights-tab";
 import CardDisplayTab from "./board-settings/card-display-tab";
 import { Board, CardDisplayFormValues, ColumnFormValues, GeneralFormValues, SortingFormValues } from "@/lib/models/models.types";
 import { useState } from "react";
@@ -41,6 +42,7 @@ type BoardSettingsDialogProps = {
 
 const TABS = [
     { value: "general", label: "General", icon: LayoutGrid },
+    { value: "insights", label: "Insights", icon: Columns3 },
     { value: "columns", label: "Columns", icon: Columns3 },
     { value: "cards", label: "Card display", icon: SquareStack },
     { value: "sorting", label: "Sorting", icon: ArrowUpDown },
@@ -300,6 +302,10 @@ export default function BoardSettingsDialog({
 
                             <TabsContent value="data" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
                                 <DataTab boardId={board._id} boardName={board.name} />
+                            </TabsContent>
+
+                            <TabsContent value="insights" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">
+                                <InsightsTab boardId={board._id} />
                             </TabsContent>
 
                             <TabsContent value="danger" className="mt-0 space-y-4 overflow-y-auto data-[state=inactive]:hidden">

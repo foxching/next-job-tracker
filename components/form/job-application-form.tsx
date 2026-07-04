@@ -3,6 +3,9 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export type JobApplicationFormData = {
     company: string;
@@ -121,17 +124,45 @@ export default function JobApplicationForm({
 
             <div className="space-y-2 mt-4">
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input
-                    id="tags"
-                    placeholder="React, Tailwind, High Pay"
-                    value={formData.tags}
-                    onChange={(e) =>
-                        setFormData((prev) => ({
-                            ...prev,
-                            tags: e.target.value,
-                        }))
-                    }
-                />
+                <div className="flex gap-2 items-center">
+                    <Input
+                        id="tags"
+                        placeholder="React, Tailwind, High Pay"
+                        value={formData.tags}
+                        onChange={(e) =>
+                            setFormData((prev) => ({
+                                ...prev,
+                                tags: e.target.value,
+                            }))
+                        }
+                    />
+                    <Button
+                        variant="outline"
+                        onClick={async () => {
+                            try {
+                                const res = await fetch("/api/ai/suggest-tags", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ company: formData.company, position: formData.position, description: formData.description }),
+                                });
+                                const data = await res.json();
+                                if (!res.ok) {
+                                    toast.error(data.error ?? "Upgrade to use tag suggestions");
+                                    return;
+                                }
+                                if (data?.success) {
+                                    setFormData((prev) => ({ ...prev, tags: data.tags.join(", ") }));
+                                    toast.success("Suggested tags inserted");
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                toast.error("Failed to suggest tags");
+                            }
+                        }}
+                    >
+                        <Sparkles className="w-4 h-4 mr-2" /> Suggest
+                    </Button>
+                </div>
             </div>
 
             <div className="space-y-2 mt-4">

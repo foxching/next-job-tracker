@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { getSession } from "../auth/auth";
 import connectDB from "../db";
+import { getCurrentUserPlan } from "./subscription";
 import { Board, Column, JobApplication } from "../models";
 import { ExportBoardError, ExportBoardResult, ExportedBoard, ExportedJob, ExportedColumn, SortField, DuplicateBoardResult, DuplicateBoardError, DeleteBoardResult, DeleteBoardError } from "../models/models.types";
 import { SortDirection } from "mongodb";
@@ -46,6 +47,19 @@ export async function createBoard(name: string) {
     }
 
     await connectDB();
+
+    // enforce plan limits: free users can only have up to 2 boards
+    try {
+        const plan = await getCurrentUserPlan();
+        if (plan.plan === "free") {
+            const boardCount = await Board.countDocuments({ userId: session.user.id });
+            if (boardCount >= 2) {
+                return { error: "Free accounts are limited to 2 boards. Upgrade to premium to create more." };
+            }
+        }
+    } catch (err) {
+        console.error("Error checking user plan:", err);
+    }
 
     // Optional: check for duplicate board names
     const existingBoard = await Board.findOne({
@@ -351,6 +365,16 @@ export async function exportBoardAction(
 
         await connectDB();
 
+        // Only premium users can export
+        try {
+            const plan = await getCurrentUserPlan();
+            if (plan.plan === "free") {
+                return { success: false, error: "Exporting boards is a premium feature. Upgrade to access export." };
+            }
+        } catch (err) {
+            console.error("Error checking plan for export:", err);
+        }
+
         const board = await Board.findOne({
             _id: boardId,
             userId: session.user.id,
@@ -424,6 +448,16 @@ export async function duplicateBoardAction(
     }
 
     await connectDB();
+
+    // Only premium users can duplicate/clone boards
+    try {
+        const plan = await getCurrentUserPlan();
+        if (plan.plan === "free") {
+            return { success: false, error: "Duplicating boards is a premium feature. Upgrade to access cloning." };
+        }
+    } catch (err) {
+        console.error("Error checking plan for duplicate:", err);
+    }
 
     //Fetch source board 
     const sourceBoard = await Board.findOne({

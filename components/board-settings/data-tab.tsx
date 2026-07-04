@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, Copy, Archive } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -27,6 +27,7 @@ interface ActionCardProps {
     buttonClass: string;
     onClick: () => void;
     loading?: boolean;
+    disabled?: boolean;
 }
 
 const ActionCard = ({
@@ -38,6 +39,7 @@ const ActionCard = ({
     buttonClass,
     onClick,
     loading,
+    disabled,
 }: ActionCardProps) => (
     <div className="flex items-start gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4 transition-colors hover:border-gray-300">
         <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClass}`}>
@@ -49,8 +51,8 @@ const ActionCard = ({
         </div>
         <button
             onClick={onClick}
-            disabled={loading}
-            className={`shrink-0 self-center rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${buttonClass}`}
+            disabled={loading || disabled}
+            className={`shrink-0 self-center rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50 ${disabled ? "opacity-60 cursor-not-allowed" : ""} ${buttonClass}`}
         >
             {loading ? "Please wait…" : buttonLabel}
         </button>
@@ -66,6 +68,24 @@ const BoardSettingsDataTab = ({ boardId, boardName }: BoardSettingsDataTabProps)
     const [exportLoading, setExportLoading] = useState(false);
     const [duplicateLoading, setDuplicateLoading] = useState(false);
     const [archiveLoading, setArchiveLoading] = useState(false);
+    const [plan, setPlan] = useState<"free" | "premium" | "unknown">("unknown");
+
+    useEffect(() => {
+        let mounted = true;
+        fetch("/api/subscription")
+            .then((r) => r.json())
+            .then((data) => {
+                if (!mounted) return;
+                setPlan(data?.plan === "premium" ? "premium" : "free");
+            })
+            .catch(() => {
+                if (!mounted) return;
+                setPlan("free");
+            });
+        return () => {
+            mounted = false;
+        };
+    }, []);
 
     const handleExport = async () => {
         setExportLoading(true);
@@ -186,6 +206,7 @@ const BoardSettingsDataTab = ({ boardId, boardName }: BoardSettingsDataTabProps)
                 buttonClass="border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                 onClick={handleExport}
                 loading={exportLoading}
+                disabled={plan === "free"}
             />
 
             <ActionCard
@@ -197,7 +218,21 @@ const BoardSettingsDataTab = ({ boardId, boardName }: BoardSettingsDataTabProps)
                 buttonClass="border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
                 onClick={handleDuplicate}
                 loading={duplicateLoading}
+                disabled={plan === "free"}
             />
+
+            {plan === "free" && (
+                <div className="rounded-md border border-dashed border-gray-200 bg-white p-3">
+                    <p className="text-sm text-gray-700">
+                        Exporting and duplicating boards are premium features. Upgrade to unlock these tools.
+                    </p>
+                    <div className="mt-2">
+                        <a href="/profile" className="inline-flex items-center rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700">
+                            Upgrade
+                        </a>
+                    </div>
+                </div>
+            )}
 
             <AlertDialog>
                 <div>
