@@ -14,13 +14,13 @@ type Props = {
         email?: string;
         name?: string;
         id?: string;
-        title?: string;
-        company?: string;
-        phone?: string;
-        location?: string;
-        website?: string;
-        linkedin?: string;
-        bio?: string;
+        title?: string | null | undefined;
+        company?: string | null | undefined;
+        phone?: string | null | undefined;
+        location?: string | null | undefined;
+        website?: string | null | undefined;
+        linkedin?: string | null | undefined;
+        bio?: string | null | undefined;
     }
 };
 
