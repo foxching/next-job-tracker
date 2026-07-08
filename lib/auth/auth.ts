@@ -16,6 +16,38 @@ export const auth = betterAuth({
     emailAndPassword: {
         enabled: true,
     },
+    user: {
+        additionalFields: {
+            title: {
+                type: "string",
+                required: false,
+            },
+            company: {
+                type: "string",
+                required: false,
+            },
+            phone: {
+                type: "string",
+                required: false,
+            },
+            location: {
+                type: "string",
+                required: false,
+            },
+            website: {
+                type: "string",
+                required: false,
+            },
+            linkedin: {
+                type: "string",
+                required: false,
+            },
+            bio: {
+                type: "string",
+                required: false,
+            },
+        },
+    },
     databaseHooks: {
         user: {
             create: {

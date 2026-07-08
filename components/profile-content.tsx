@@ -24,6 +24,13 @@ type ProfileContentProps = {
         emailVerified: boolean;
         name: string;
         image?: string | null;
+        title?: string;
+        company?: string;
+        phone?: string;
+        location?: string;
+        website?: string;
+        linkedin?: string;
+        bio?: string;
     };
 }
 
@@ -95,6 +102,13 @@ export default function ProfileContent({
                                         email: session?.email,
                                         name: session?.name,
                                         id: session?.id,
+                                        title: session?.title,
+                                        company: session?.company,
+                                        phone: session?.phone,
+                                        location: session?.location,
+                                        website: session?.website,
+                                        linkedin: session?.linkedin,
+                                        bio: session?.bio,
                                     }}
                                 />
                             </TabsContent>

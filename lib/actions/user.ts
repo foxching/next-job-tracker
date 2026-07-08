@@ -8,6 +8,17 @@ type UpdatePasswordInput = {
     newPassword: string;
 };
 
+type UpdateProfileInput = {
+    name: string;
+    title?: string;
+    company?: string;
+    phone?: string;
+    location?: string;
+    website?: string;
+    linkedin?: string;
+    bio?: string;
+};
+
 export async function updateName({ name }: { name: string }) {
     if (!name) {
         throw new Error("Name is required");
@@ -17,6 +28,39 @@ export async function updateName({ name }: { name: string }) {
         headers: await headers(),
         body: {
             name,
+        },
+    });
+
+    return {
+        success: true,
+    };
+}
+
+export async function updateUserProfile({
+    name,
+    title,
+    company,
+    phone,
+    location,
+    website,
+    linkedin,
+    bio,
+}: UpdateProfileInput) {
+    if (!name) {
+        throw new Error("Name is required");
+    }
+
+    await auth.api.updateUser({
+        headers: await headers(),
+        body: {
+            name,
+            title,
+            company,
+            phone,
+            location,
+            website,
+            linkedin,
+            bio,
         },
     });
 
