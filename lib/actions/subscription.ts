@@ -10,7 +10,7 @@ export async function getStripe() {
   if (!secret) {
     throw new Error("STRIPE_SECRET_KEY is not configured.");
   }
-  return new Stripe(secret);
+  return new Stripe(secret, { apiVersion: "2022-11-15" });
 }
 
 export async function getCurrentUserPlan() {
@@ -141,13 +141,13 @@ export async function getUserBillingSummary(userId: string) {
       false,
     subscription: activeSubscription
       ? {
-          id: activeSubscription.id,
-          status: activeSubscription.status,
-          priceId: activeSubscription.items.data[0]?.price?.id ?? null,
-          productName: activeSubscription.items.data[0]?.price?.product as
-            string | null,
-          currentPeriodEnd: activeSubscription.current_period_end,
-        }
+        id: activeSubscription.id,
+        status: activeSubscription.status,
+        priceId: activeSubscription.items.data[0]?.price?.id ?? null,
+        productName: activeSubscription.items.data[0]?.price?.product as
+          string | null,
+        currentPeriodEnd: activeSubscription.current_period_end,
+      }
       : null,
     invoices: invoices.data.map((invoice) => ({
       id: invoice.id,
