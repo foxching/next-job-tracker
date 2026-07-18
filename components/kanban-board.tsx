@@ -118,7 +118,7 @@ function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, 
     }
 
     return (
-        <Card className="min-w-[290px] max-w-[290px] flex-shrink-0 shadow-md p-0 flex flex-col">
+        <Card className="min-w-[290px] max-w-[290px] h-full flex-shrink-0 shadow-md p-0 flex flex-col">
             <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3 relative`}>
                 <div className=" flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -144,8 +144,8 @@ function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, 
                     </DropdownMenu>
                 </div>
             </CardHeader>
-            <div className={`flex flex-col gap-2 min-h-0 bg-muted/20 rounded-b-lg overflow-hidden ${isOver ? "ring-2 ring-blue-500" : ""}`}>
-                <CardContent ref={setNodeRef} className="max-h-[400px] overflow-y-auto space-y-2 pt-2 pb-2">
+            <div className={`flex flex-col gap-2 flex-1 min-h-0 bg-muted/20 rounded-b-lg overflow-hidden ${isOver ? "ring-2 ring-blue-500" : ""}`}>
+                <CardContent ref={setNodeRef} className="flex-1 min-h-0 overflow-y-auto space-y-2 pt-2 pb-2">
                     <SortableContext items={jobs.map((j) => j._id)} strategy={verticalListSortingStrategy}>
                         {sortJobs(jobs.filter((j) => matchesFilters(j, filters)), sorting).map((job) => (
                             <SortableJobCard key={job._id} job={{ ...job, columnId: job.columnId || column._id }} columns={sortedColumns} cardDisplay={cardDisplay} />
@@ -265,7 +265,7 @@ export default function KanbanBoard({ externalFilters, setExternalFilters }: { e
 
     return (
         <DndContext id="kanban-board-dnd" sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-            <div className="flex flex-col gap-4 w-full h-full min-h-0">
+            <div className="flex flex-col gap-4 w-full h-full min-h-0 overflow-hidden">
                 {sortedColumns.length > 0 && sorting.field !== "manual" && (
                     <div className="flex items-center gap-1.5 px-2 text-sm text-muted-foreground shrink-0">
                         <ArrowUpDown className="h-3.5 w-3.5" />
@@ -274,7 +274,7 @@ export default function KanbanBoard({ externalFilters, setExternalFilters }: { e
                 )}
 
                 {sortedColumns.length > 0 ? (
-                    <div className="flex-1 min-h-0 flex gap-4 overflow-x-auto pb-4 p-2 w-full items-start">
+                    <div className="flex-1 min-h-0 flex gap-4 overflow-x-auto overflow-y-hidden pb-4 p-2 w-full items-start">
                         {sortedColumns.map((col) => {
                             const config: ColConfig = { color: col.color || DEFAULT_COLUMN_CONFIG.color, icon: ICON_MAP[col.icon || "Calendar"] || DEFAULT_COLUMN_CONFIG.icon };
                             return <DroppableColumn key={col._id} column={col} config={config} boardId={board?._id ?? ""} sortedColumns={sortedColumns} cardDisplay={cardDisplay} filters={externalFilters} sorting={sorting} />;
