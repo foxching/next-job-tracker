@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { toast } from "sonner";
 import JobApplicationForm, { JobApplicationFormData } from "./form/job-application-form";
 import { useBoardContext } from "./board-provider";
+import { FormProvider, useForm } from "react-hook-form";
 
 type CardDisplaySettings = {
     showSalary: boolean;
@@ -35,10 +36,9 @@ function formatAppliedDate(date: string | Date) {
 
 export default function JobApplicationCard({ job, columns, dragHandleProps, cardDisplay }: JobApplicationCardProps) {
     const [isEditing, setIsEditing] = useState(false);
-    const [isUpdating, setIsUpdating] = useState(false);
     const [isDescOpen, setIsDescOpen] = useState(false);
-    const [formData, setFormData] =
-        useState<JobApplicationFormData>({
+    const form = useForm<JobApplicationFormData>({
+        defaultValues: {
             company: job.company,
             position: job.position,
             location: job.location || "",
@@ -50,13 +50,12 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                 ? new Date(job.appliedDate).toISOString().split("T")[0]
                 : "",
             description: job.description || "",
-        });
+        },
+    });
     const [showAllTags, setShowAllTags] = useState(false);
     const { updateJob, removeJob, moveJob } = useBoardContext();
 
-    async function handleUpdate(e: React.FormEvent) {
-        e.preventDefault();
-        setIsUpdating(true);
+    async function handleUpdate(formData: JobApplicationFormData) {
         try {
             const result = await updateJobApplication(job._id, {
                 ...formData,
@@ -79,8 +78,6 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
             toast.success("Job application updated successfully!");
         } catch {
             toast.error("Failed to update job application.");
-        } finally {
-            setIsUpdating(false);
         }
     }
 
@@ -299,27 +296,26 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                         <DialogTitle>Edit Job Application</DialogTitle>
                         <DialogDescription>Update your job application details</DialogDescription>
                     </DialogHeader>
-                    <form className="flex h-full min-h-0 flex-col " onSubmit={handleUpdate}>
-                        <div className="flex-1 overflow-y-auto min-h-0 pr-2">
-                            <JobApplicationForm
-                                formData={formData}
-                                setFormData={setFormData}
-                            />
-                        </div>
+                    <FormProvider {...form}>
+                        <form className="flex h-full min-h-0 flex-col " onSubmit={form.handleSubmit(handleUpdate)}>
+                            <div className="flex-1 overflow-y-auto min-h-0 pr-2">
+                                <JobApplicationForm />
+                            </div>
 
-                        <DialogFooter>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setIsEditing(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button type="submit" disabled={isUpdating}>
-                                {isUpdating ? "Updating..." : "Update Application"}
-                            </Button>
-                        </DialogFooter>
-                    </form>
+                            <DialogFooter>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setIsEditing(false)}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button type="submit" disabled={form.formState.isSubmitting}>
+                                    {form.formState.isSubmitting ? "Updating..." : "Update Application"}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </FormProvider>
                 </DialogContent>
             </Dialog>
         </>

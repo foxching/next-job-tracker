@@ -16,6 +16,8 @@ import { createJobApplication } from "@/lib/actions/job-application";
 import { toast } from "sonner";
 import JobApplicationForm from "./form/job-application-form";
 import { useBoardContext } from "./board-provider";
+import { FormProvider, useForm } from "react-hook-form";
+import type { JobApplicationFormData } from "./form/job-application-form";
 
 interface CreateJobApplicationDialogProps {
     columnId: string;
@@ -36,13 +38,12 @@ const INITIAL_FORM_DATA = {
 
 export default function CreateJobApplicationDialog({ columnId, boardId }: CreateJobApplicationDialogProps) {
     const [open, setOpen] = useState(false);
-    const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const form = useForm<JobApplicationFormData>({
+        defaultValues: INITIAL_FORM_DATA,
+    });
     const { addJob } = useBoardContext();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
+    const handleSubmit = async (formData: JobApplicationFormData) => {
         try {
             const result = await createJobApplication({
                 ...formData,
@@ -63,13 +64,11 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                 addJob(result.data);
             }
 
-            setFormData(INITIAL_FORM_DATA);
+            form.reset(INITIAL_FORM_DATA);
             setOpen(false);
             toast.success("Job application created successfully!");
         } catch {
             toast.error("An error occurred while creating the job application.");
-        } finally {
-            setIsSubmitting(false);
         }
     }
     return (
@@ -90,26 +89,25 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
                         Fill in the details for the new job application.
                     </DialogDescription>
                 </DialogHeader>
-                <form className="flex h-full min-h-0 flex-col " onSubmit={handleSubmit}>
-                    <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
-                        <JobApplicationForm
-                            formData={formData}
-                            setFormData={setFormData}
-                        />
-                    </div>
-                    <DialogFooter className="shrink-0 pt-4 border-t">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setOpen(false)}
-                        >
-                            Cancel
-                        </Button>
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting ? "Creating..." : "Create Application"}
-                        </Button>
-                    </DialogFooter>
-                </form>
+                <FormProvider {...form}>
+                    <form className="flex h-full min-h-0 flex-col " onSubmit={form.handleSubmit(handleSubmit)}>
+                        <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
+                            <JobApplicationForm />
+                        </div>
+                        <DialogFooter className="shrink-0 pt-4 border-t">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setOpen(false)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                                {form.formState.isSubmitting ? "Creating..." : "Create Application"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </FormProvider>
             </DialogContent>
         </Dialog>
     )

@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useFormContext } from "react-hook-form";
 
 export type JobApplicationFormData = {
     company: string;
@@ -19,15 +20,14 @@ export type JobApplicationFormData = {
     description: string;
 };
 
-type JobApplicationFormProps = {
-    formData: JobApplicationFormData;
-    setFormData: React.Dispatch<React.SetStateAction<JobApplicationFormData>>;
-};
+export default function JobApplicationForm() {
+    const {
+        register,
+        setValue,
+        getValues,
+        formState: { errors },
+    } = useFormContext<JobApplicationFormData>();
 
-export default function JobApplicationForm({
-    formData,
-    setFormData,
-}: JobApplicationFormProps) {
     return (
         <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
             <div className="grid grid-cols-2 gap-4">
@@ -35,43 +35,25 @@ export default function JobApplicationForm({
                     <Label htmlFor="company">Company *</Label>
                     <Input
                         id="company"
-                        required
-                        value={formData.company}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                company: e.target.value,
-                            }))
-                        }
+                        {...register("company", { required: "Company is required" })}
                     />
+                    {errors.company && <p className="text-sm text-destructive">{errors.company.message}</p>}
                 </div>
 
                 <div className="space-y-2">
                     <Label htmlFor="position">Position *</Label>
                     <Input
                         id="position"
-                        required
-                        value={formData.position}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                position: e.target.value,
-                            }))
-                        }
+                        {...register("position", { required: "Position is required" })}
                     />
+                    {errors.position && <p className="text-sm text-destructive">{errors.position.message}</p>}
                 </div>
 
                 <div className="space-y-2">
                     <Label htmlFor="location">Location</Label>
                     <Input
                         id="location"
-                        value={formData.location}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                location: e.target.value,
-                            }))
-                        }
+                        {...register("location")}
                     />
                 </div>
 
@@ -80,13 +62,7 @@ export default function JobApplicationForm({
                     <Input
                         id="salary"
                         placeholder="e.g., $100k - $150k"
-                        value={formData.salary}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                salary: e.target.value,
-                            }))
-                        }
+                        {...register("salary")}
                     />
                 </div>
 
@@ -96,14 +72,14 @@ export default function JobApplicationForm({
                         id="jobUrl"
                         type="url"
                         placeholder="https://..."
-                        value={formData.jobUrl}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                jobUrl: e.target.value,
-                            }))
-                        }
+                        {...register("jobUrl", {
+                            pattern: {
+                                value: /^https?:\/\/\S+$/,
+                                message: "Enter a valid URL",
+                            },
+                        })}
                     />
+                    {errors.jobUrl && <p className="text-sm text-destructive">{errors.jobUrl.message}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -111,13 +87,7 @@ export default function JobApplicationForm({
                     <Input
                         id="appliedDate"
                         type="date"
-                        value={formData.appliedDate}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                appliedDate: e.target.value,
-                            }))
-                        }
+                        {...register("appliedDate")}
                     />
                 </div>
             </div>
@@ -128,13 +98,7 @@ export default function JobApplicationForm({
                     <Input
                         id="tags"
                         placeholder="React, Tailwind, High Pay"
-                        value={formData.tags}
-                        onChange={(e) =>
-                            setFormData((prev) => ({
-                                ...prev,
-                                tags: e.target.value,
-                            }))
-                        }
+                        {...register("tags")}
                     />
                     <Button
                         variant="outline"
@@ -143,7 +107,11 @@ export default function JobApplicationForm({
                                 const res = await fetch("/api/ai/suggest-tags", {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ company: formData.company, position: formData.position, description: formData.description }),
+                                    body: JSON.stringify({
+                                        company: getValues("company"),
+                                        position: getValues("position"),
+                                        description: getValues("description"),
+                                    }),
                                 });
                                 const data = await res.json();
                                 if (!res.ok) {
@@ -151,7 +119,7 @@ export default function JobApplicationForm({
                                     return;
                                 }
                                 if (data?.success) {
-                                    setFormData((prev) => ({ ...prev, tags: data.tags.join(", ") }));
+                                    setValue("tags", data.tags.join(", "));
                                     toast.success("Suggested tags inserted");
                                 }
                             } catch (err) {
@@ -171,13 +139,7 @@ export default function JobApplicationForm({
                     id="description"
                     rows={3}
                     placeholder="Brief description of the role..."
-                    value={formData.description}
-                    onChange={(e) =>
-                        setFormData((prev) => ({
-                            ...prev,
-                            description: e.target.value,
-                        }))
-                    }
+                    {...register("description")}
                 />
             </div>
 
@@ -186,13 +148,7 @@ export default function JobApplicationForm({
                 <Textarea
                     id="notes"
                     rows={4}
-                    value={formData.notes}
-                    onChange={(e) =>
-                        setFormData((prev) => ({
-                            ...prev,
-                            notes: e.target.value,
-                        }))
-                    }
+                    {...register("notes")}
                 />
             </div>
         </div>
