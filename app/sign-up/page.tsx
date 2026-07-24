@@ -1,47 +1,81 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { signUp } from "@/lib/auth/auth-client";
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { signUp } from "@/lib/auth/auth-client";
+
+import { Button } from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+
+const signUpSchema = z.object({
+    name: z
+        .string()
+        .trim()
+        .min(1, "Name is required")
+        .max(100, "Name is too long"),
+
+    email: z
+        .string()
+        .trim()
+        .min(1, "Email is required")
+        .email("Please enter a valid email address"),
+
+    password: z
+        .string()
+        .trim()
+        .min(1, "Password is required")
+        .min(8, "Password must be at least 8 characters"),
+});
+
+type SignUpForm = z.infer<typeof signUpSchema>;
 
 const SignUp = () => {
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [serverError, setServerError] = useState("");
 
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<SignUpForm>({
+        resolver: zodResolver(signUpSchema),
+        defaultValues: {
+            name: "",
+            email: "",
+            password: "",
+        },
+    });
 
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
-
-        setError("");
-        setLoading(true);
+    const onSubmit = async (data: SignUpForm) => {
+        setServerError("");
 
         try {
-            const result = await signUp.email({
-                name,
-                email,
-                password,
-            });
+            const result = await signUp.email(data);
 
             if (result.error) {
-                setError(result.error.message ?? "Failed to sign up");
-            } else {
-                router.push("/dashboard");
+                setServerError(result.error.message ?? "Failed to sign up");
+                return;
             }
+
+            router.push("/dashboard");
         } catch {
-            setError("An unexpected error occurred");
-        } finally {
-            setLoading(false);
+            setServerError("An unexpected error occurred");
         }
-    }
+    };
 
     return (
         <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-background p-4 text-foreground">
@@ -50,67 +84,97 @@ const SignUp = () => {
                     <CardTitle className="text-2xl font-bold">
                         Sign Up
                     </CardTitle>
-                    <CardDescription className="text-muted-foreground">
-                        Create an account to start tracking your job application
+
+                    <CardDescription>
+                        Create an account to start tracking your job applications
                     </CardDescription>
                 </CardHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
+
+                <form onSubmit={handleSubmit(onSubmit)}>
                     <CardContent className="space-y-4">
-                        {error && (
+                        {serverError && (
                             <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-                                {error}
+                                {serverError}
                             </div>
                         )}
+
                         <div className="space-y-2">
-                            <Label htmlFor="name" className="text-muted-foreground">
-                                Name
+                            <Label htmlFor="name">
+                                Name<span className="text-destructive">*</span>
                             </Label>
+
                             <Input
                                 id="name"
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
                                 placeholder="John Doe"
-                                required
-                                className="border-gray-300 focus:border-primary focus:ring-primary"
+                                {...register("name", {
+                                    required: "Name is required",
+                                })}
                             />
+
+                            {errors.name && (
+                                <p className="text-sm text-destructive">
+                                    {errors.name.message}
+                                </p>
+                            )}
                         </div>
+
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-muted-foreground">
-                                Email
+                            <Label htmlFor="email">
+                                Email<span className="text-destructive">*</span>
                             </Label>
+
                             <Input
                                 id="email"
                                 type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
-                                required
-                                className="border-gray-300 focus:border-primary focus:ring-primary"
+                                {...register("email", {
+                                    required: "Email is required",
+                                })}
                             />
+
+                            {errors.email && (
+                                <p className="text-sm text-destructive">
+                                    {errors.email.message}
+                                </p>
+                            )}
                         </div>
+
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-muted-foreground">
-                                Password
+                            <Label htmlFor="password">Password
+                                <span className="text-destructive">*</span>
                             </Label>
+
                             <Input
                                 id="password"
                                 type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                                minLength={8}
-                                className="border-gray-300 focus:border-primary focus:ring-primary"
+                                {...register("password", {
+                                    required: "Password is required",
+                                })}
                             />
+
+                            {errors.password && (
+                                <p className="text-sm text-destructive">
+                                    {errors.password.message}
+                                </p>
+                            )}
                         </div>
                     </CardContent>
+
                     <CardFooter className="flex flex-col space-y-4">
-                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
-                            {loading ? "Creating account..." : "Sign Up"}
+                        <Button
+                            type="submit"
+                            className="w-full"
+                            disabled={isSubmitting}
+                        >
+                            {isSubmitting ? "Creating account..." : "Sign Up"}
                         </Button>
+
                         <p className="text-center text-sm text-muted-foreground">
-                            Already have an account?
-                            <Link href="/sign-in" className="font-medium text-primary hover:underline">
+                            Already have an account?{" "}
+                            <Link
+                                href="/sign-in"
+                                className="font-medium text-primary hover:underline"
+                            >
                                 Login
                             </Link>
                         </p>
@@ -118,6 +182,7 @@ const SignUp = () => {
                 </form>
             </Card>
         </div>
-    )
-}
-export default SignUp
+    );
+};
+
+export default SignUp;

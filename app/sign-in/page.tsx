@@ -8,40 +8,56 @@ import Link from "next/link";
 import { signIn } from "@/lib/auth/auth-client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const signInSchema = z.object({
+    email: z
+        .string()
+        .trim()
+        .min(1, "Email is required")
+        .email("Please enter a valid email address"),
+    password: z
+        .string()
+        .trim()
+        .min(1, "Password is required")
+});
+
+type SignInForm = z.infer<typeof signInSchema>;
 
 const SignIn = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
-
-
+    const [serverError, setServerError] = useState("");
     const router = useRouter();
 
-    async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault();
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<SignInForm>({
+        resolver: zodResolver(signInSchema),
+        defaultValues: {
+            email: "",
+            password: "",
+        },
+    });
 
-        setError("");
-        setLoading(true);
+    const onSubmit = async (data: SignInForm) => {
+        setServerError("");
 
         try {
-            const result = await signIn.email({
-                email,
-                password,
-            });
+            const result = await signIn.email(data);
 
             if (result.error) {
-                setError(result.error.message ?? "Failed to sign in");
-            } else {
-                router.push("/dashboard");
+                setServerError(result.error.message ?? "Failed to sign in");
+                return;
             }
+
+            router.push("/dashboard");
         } catch {
-            setError("An unexpected error occurred");
-        } finally {
-            setLoading(false);
+            setServerError("An unexpected error occurred");
         }
-    }
+    };
 
     return (
         <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-background p-4 text-foreground">
@@ -54,11 +70,11 @@ const SignIn = () => {
                         Enter your credentials to access your account
                     </CardDescription>
                 </CardHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <CardContent className="space-y-4">
-                        {error && (
+                        {serverError && (
                             <div className="rounded-md bg-destructive/15 p-3 text-sm text-destructive">
-                                {error}
+                                {serverError}
                             </div>
                         )}
                         <div className="space-y-2">
@@ -68,12 +84,14 @@ const SignIn = () => {
                             <Input
                                 id="email"
                                 type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="you@example.com"
-                                required
-                                className="border-gray-300 focus:border-primary focus:ring-primary"
+                                {...register("email")}
                             />
+                            {errors.email && (
+                                <p className="text-sm text-destructive">
+                                    {errors.email.message}
+                                </p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="password" className="text-muted-foreground">
@@ -82,17 +100,18 @@ const SignIn = () => {
                             <Input
                                 id="password"
                                 type="password"
-                                required
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                minLength={8}
-                                className="border-gray-300 focus:border-primary focus:ring-primary"
+                                {...register("password")}
                             />
+                            {errors.password && (
+                                <p className="text-sm text-destructive">
+                                    {errors.password.message}
+                                </p>
+                            )}
                         </div>
                     </CardContent>
                     <CardFooter className="flex flex-col space-y-4">
-                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={loading}>
-                            {loading ? "Signing in..." : "Sign in"}
+                        <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isSubmitting}>
+                            {isSubmitting ? "Signing in..." : "Sign in"}
                         </Button>
                         <p className="text-center text-sm text-muted-foreground">
                             Don&apos;t have an account?{" "}
