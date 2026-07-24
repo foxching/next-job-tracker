@@ -35,6 +35,12 @@ interface ColConfig {
     icon: React.ReactNode;
 }
 
+function getColumnColorStyle(color: string) {
+    return color.startsWith("#") || color.startsWith("rgb") || color.startsWith("hsl")
+        ? { backgroundColor: color }
+        : undefined;
+}
+
 type CardDisplaySettings =
     NonNullable<NonNullable<Board["settings"]>["cardDisplay"]>;
 type SortingSettings = NonNullable<NonNullable<Board["settings"]>["sorting"]>;
@@ -119,7 +125,10 @@ function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, 
 
     return (
         <Card className="min-w-[290px] max-w-[290px] h-full flex-shrink-0 shadow-md p-0 flex flex-col">
-            <CardHeader className={`${config.color} text-white rounded-t-lg pb-3 pt-3 relative`}>
+            <CardHeader
+                className={`${config.color.startsWith("#") ? "" : config.color} text-white rounded-t-lg pb-3 pt-3 relative`}
+                style={getColumnColorStyle(config.color)}
+            >
                 <div className=" flex items-center justify-between">
                     <div className="flex items-center gap-2">
                         {config.icon}

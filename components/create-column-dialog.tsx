@@ -23,6 +23,7 @@ import {
     Mic,
     XCircle,
 } from "lucide-react";
+import { HexColorPicker } from "react-colorful";
 
 const ICON_OPTIONS = [
     { value: "Calendar", label: "Calendar", icon: <Calendar className="h-5 w-5" /> },
@@ -32,13 +33,17 @@ const ICON_OPTIONS = [
     { value: "XCircle", label: "X", icon: <XCircle className="h-5 w-5" /> },
 ];
 
-const COLOR_OPTIONS = [
-    { value: "bg-cyan-500", label: "Cyan" },
-    { value: "bg-purple-500", label: "Purple" },
-    { value: "bg-green-500", label: "Green" },
-    { value: "bg-yellow-500", label: "Yellow" },
-    { value: "bg-red-500", label: "Red" },
-];
+const LEGACY_COLORS: Record<string, string> = {
+    "bg-cyan-500": "#06B6D4",
+    "bg-purple-500": "#A855F7",
+    "bg-green-500": "#00C853",
+    "bg-yellow-500": "#F4B400",
+    "bg-red-500": "#FF3344",
+};
+
+function toPickerColor(color?: string) {
+    return color && LEGACY_COLORS[color] ? LEGACY_COLORS[color] : color || "#06B6D4";
+}
 
 interface CreateColumnDialogProps {
     boardId: string;
@@ -56,7 +61,9 @@ export default function CreateColumnDialog({
     const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
     const [name, setName] = useState(column ? column.name : "");
     const [icon, setIcon] = useState(column ? column.icon || "Calendar" : "Calendar");
-    const [color, setColor] = useState(column ? column.color || "bg-cyan-500" : "bg-cyan-500");
+    const [color, setColor] = useState(toPickerColor(column?.color));
+    const [colorPickerOpen, setColorPickerOpen] = useState(false);
+    const [draftColor, setDraftColor] = useState(toPickerColor(column?.color));
     const [isLoading, setIsLoading] = useState(false);
     const { addColumn, updateColumn: updateColumnState } = useBoardContext();
 
@@ -75,11 +82,13 @@ export default function CreateColumnDialog({
             if (column) {
                 setName(column.name);
                 setIcon(column.icon || "Calendar");
-                setColor(column.color || "bg-cyan-500");
+                setColor(toPickerColor(column.color));
+                setDraftColor(toPickerColor(column.color));
             } else {
                 setName("");
                 setIcon("Calendar");
-                setColor("bg-cyan-500");
+                setColor("#06B6D4");
+                setDraftColor("#06B6D4");
             }
             return;
         }
@@ -87,7 +96,9 @@ export default function CreateColumnDialog({
         // Reset form when closing
         setName("");
         setIcon("Calendar");
-        setColor("bg-cyan-500");
+        setColor("#06B6D4");
+        setDraftColor("#06B6D4");
+        setColorPickerOpen(false);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -95,6 +106,11 @@ export default function CreateColumnDialog({
 
         if (!name.trim()) {
             toast.error("Column name is required");
+            return;
+        }
+
+        if (!/^#[0-9A-Fa-f]{6}$/.test(color)) {
+            toast.error("Enter a valid six-digit hex color");
             return;
         }
 
@@ -178,24 +194,24 @@ export default function CreateColumnDialog({
                     </div>
                     <div className="space-y-3">
                         <Label>Background</Label>
-                        <div className="grid grid-cols-5 gap-2">
-                            {COLOR_OPTIONS.map((option) => (
-                                <button
-                                    key={option.value}
-                                    type="button"
-                                    onClick={() => setColor(option.value)}
-                                    className={`flex h-14 flex-col items-center justify-center rounded-lg border p-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/50 ${color === option.value
-                                        ? "border-primary"
-                                        : "border-border hover:border-secondary"
-                                        }`}
-                                >
-                                    <span className={`h-10 w-10 rounded-full ${option.value}`} />
-                                    <span className="mt-2 text-[11px] font-medium uppercase tracking-[0.08em] text-muted-foreground">
-                                        {option.label}
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
+                        <button
+                            type="button"
+                            className="flex w-full items-center gap-3 rounded-lg border p-2 text-left transition-colors hover:border-primary focus:outline-none focus:ring-2 focus:ring-primary/50"
+                            onClick={() => {
+                                setDraftColor(color);
+                                setColorPickerOpen(true);
+                            }}
+                            disabled={isLoading}
+                        >
+                            <span
+                                className="h-9 w-9 shrink-0 rounded-md border"
+                                style={{ backgroundColor: color }}
+                            />
+                            <span className="flex flex-col">
+                                <span className="text-sm font-medium">Choose background color</span>
+                                <span className="text-xs text-muted-foreground">{color}</span>
+                            </span>
+                        </button>
                     </div>
                     <DialogFooter>
                         <Button
@@ -218,6 +234,54 @@ export default function CreateColumnDialog({
                     </DialogFooter>
                 </form>
             </DialogContent>
+            <Dialog open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
+                <DialogContent className="w-[min(22rem,calc(100%-2rem))] max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Choose background color</DialogTitle>
+                        <DialogDescription>Pick a color for this column header.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="flex justify-center rounded-lg border bg-muted/20 p-3">
+                            <HexColorPicker color={draftColor} onChange={setDraftColor} />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <span
+                                className="h-9 w-9 shrink-0 rounded-md border"
+                                style={{ backgroundColor: draftColor }}
+                            />
+                            <Input
+                                value={draftColor}
+                                onChange={(event) => setDraftColor(event.target.value)}
+                                placeholder="#06B6D4"
+                                maxLength={7}
+                                aria-label="Hex background color"
+                            />
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setColorPickerOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                if (!/^#[0-9A-Fa-f]{6}$/.test(draftColor)) {
+                                    toast.error("Enter a valid six-digit hex color");
+                                    return;
+                                }
+                                setColor(draftColor);
+                                setColorPickerOpen(false);
+                            }}
+                        >
+                            Apply Color
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Dialog>
     );
 }

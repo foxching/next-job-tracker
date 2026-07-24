@@ -82,7 +82,8 @@ export default function ColumnTab({
                                     <TableRow key={column._id}>
                                         <TableCell>
                                             <div
-                                                className={`w-6 h-6 rounded-full border ${column.color}`}
+                                                className={`w-6 h-6 rounded-full border ${column.color?.startsWith("#") ? "" : column.color || "bg-cyan-500"}`}
+                                                style={column.color?.startsWith("#") ? { backgroundColor: column.color } : undefined}
                                             />
                                         </TableCell>
 
