@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Filter } from "lucide-react";
+import { Plus, Filter, Columns3, ArrowUpDown, LayoutDashboard, MoreHorizontal } from "lucide-react";
 import { Board } from "@/lib/models/models.types";
 import { BoardProvider, useBoardContext } from "./board-provider";
 import BoardMenu from "./board-menu";
@@ -37,7 +37,55 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
                     <BoardSwitcher boards={boards} />
                 </div>
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <BoardMenu />
+                    <Button>
+                        <Plus className="h-4 w-4" />
+                        Add application
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label="Add column"
+                        title="Add column"
+                    >
+                        <Columns3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label="Filter applications"
+                        title="Filter applications"
+                        onClick={() => setIsFilterOpen(true)}
+                    >
+                        <Filter className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label="Sort applications"
+                        title="Sort applications"
+                    >
+                        <ArrowUpDown className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label="Change board view"
+                        title="Change board view"
+                    >
+                        <LayoutDashboard className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        aria-label="More board actions"
+                        title="More board actions"
+                    >
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+
+
+                    {/* <BoardMenu />
                     <Button variant="outline" onClick={() => setIsFilterOpen(true)}>
                         <Filter className="mr-2 h-4 w-4" />
                         Filters
@@ -45,7 +93,7 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
                     <Button>
                         <Plus className="mr-2 h-4 w-4" />
                         New application
-                    </Button>
+                    </Button> */}
                 </div>
             </div>
             <div
