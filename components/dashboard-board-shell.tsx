@@ -10,6 +10,7 @@ import KanbanBoard from "./kanban-board";
 import FilterModal from "./filter-modal";
 import { Button } from "./ui/button";
 import { useState } from "react";
+import CreateColumnDialog from "./create-column-dialog";
 
 function DashboardBoardContent({ boards }: { boards: Board[] }) {
     const { board, isSwitchingBoard, columns } = useBoardContext();
@@ -21,6 +22,7 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
         hasSalary: "all" as "all" | "with-salary" | "without-salary",
         hasNotes: "all" as "all" | "with-notes" | "without-notes",
     });
+    const [showAddColumnDialog, setShowAddColumnDialog] = useState(false);
 
     return (
         <>
@@ -46,6 +48,7 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
                         size="icon"
                         aria-label="Add column"
                         title="Add column"
+                        onClick={() => setShowAddColumnDialog(true)}
                     >
                         <Columns3 className="h-4 w-4" />
                     </Button>
@@ -74,26 +77,7 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
                     >
                         <LayoutDashboard className="h-4 w-4" />
                     </Button>
-
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        aria-label="More board actions"
-                        title="More board actions"
-                    >
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-
-
-                    {/* <BoardMenu />
-                    <Button variant="outline" onClick={() => setIsFilterOpen(true)}>
-                        <Filter className="mr-2 h-4 w-4" />
-                        Filters
-                    </Button>
-                    <Button>
-                        <Plus className="mr-2 h-4 w-4" />
-                        New application
-                    </Button> */}
+                    <BoardMenu />
                 </div>
             </div>
             <div
@@ -104,6 +88,13 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
             </div>
 
             <FilterModal open={isFilterOpen} onOpenChange={setIsFilterOpen} columns={columns} filters={filters} setFilters={setFilters} />
+            {showAddColumnDialog && (
+                <CreateColumnDialog
+                    boardId={board._id}
+                    open={showAddColumnDialog}
+                    onOpenChange={setShowAddColumnDialog}
+                />
+            )}
         </>
     );
 }
