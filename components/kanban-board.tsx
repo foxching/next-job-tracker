@@ -272,7 +272,10 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
                 )}
 
                 {sortedColumns.length > 0 ? (
-                    <div className="kanban-columns flex-1 min-h-0 overflow-x-auto overflow-y-hidden pb-3 w-full">
+                    <div
+                        className="kanban-columns flex-1 min-h-0 overflow-x-auto overflow-y-hidden pb-3 w-full"
+                        style={{ gridAutoColumns: "min(82vw, 270px)" }}
+                    >
                         {sortedColumns.map((col) => {
                             return <DroppableColumn key={col._id} column={col} boardId={board?._id ?? ""} sortedColumns={sortedColumns} cardDisplay={cardDisplay} filters={externalFilters} sorting={sorting} />;
                         })}
