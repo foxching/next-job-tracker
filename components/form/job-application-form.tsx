@@ -31,7 +31,7 @@ export default function JobApplicationForm() {
     return (
         <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-2">
             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
+                <div className="space-y-2 p-1">
                     <Label htmlFor="company">Company *</Label>
                     <Input
                         id="company"
@@ -49,7 +49,7 @@ export default function JobApplicationForm() {
                     {errors.position && <p className="text-sm text-destructive">{errors.position.message}</p>}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 p-1">
                     <Label htmlFor="location">Location</Label>
                     <Input
                         id="location"
@@ -66,7 +66,7 @@ export default function JobApplicationForm() {
                     />
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 p-1">
                     <Label htmlFor="jobUrl">Job URL</Label>
                     <Input
                         id="jobUrl"
@@ -92,7 +92,7 @@ export default function JobApplicationForm() {
                 </div>
             </div>
 
-            <div className="space-y-2 mt-4">
+            <div className="space-y-2 p-1 mt-4">
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
                 <div className="flex gap-2 items-center">
                     <Input
@@ -133,7 +133,7 @@ export default function JobApplicationForm() {
                 </div>
             </div>
 
-            <div className="space-y-2 mt-4">
+            <div className="space-y-2 p-1 mt-4">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                     id="description"
@@ -143,7 +143,7 @@ export default function JobApplicationForm() {
                 />
             </div>
 
-            <div className="space-y-2 mt-4">
+            <div className="space-y-2 p-1 mt-4">
                 <Label htmlFor="notes">Notes</Label>
                 <Textarea
                     id="notes"
