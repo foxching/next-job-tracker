@@ -80,7 +80,7 @@ export default function EditableBoardTitle({ boardId, initialName }: EditableBoa
                     onKeyDown={handleKeyDown}
                     onBlur={handleSave}
                     disabled={isSaving}
-                    className="text-3xl font-bold bg-transparent border-b-2 border-primary px-1 focus:outline-none disabled:opacity-50"
+                    className="dashboard-title w-full max-w-[min(52vw,32rem)] border-b-2 border-primary bg-transparent px-1 font-bold leading-none tracking-[-0.045em] focus:outline-none disabled:opacity-50"
                 />
             </div>
         );
@@ -89,7 +89,7 @@ export default function EditableBoardTitle({ boardId, initialName }: EditableBoa
     return (
         <h1
             onClick={() => setIsEditing(true)}
-            className="text-3xl font-bold cursor-pointer hover:text-primary transition-colors"
+            className="dashboard-title max-w-[min(52vw,32rem)] cursor-pointer truncate font-bold leading-none tracking-[-0.045em] transition-colors hover:text-primary"
             title="Click to edit board name"
         >
             {name}

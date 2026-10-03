@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="city-sky" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B5C8D1"/>
+      <stop offset=".52" stop-color="#829DAA"/>
+      <stop offset="1" stop-color="#526F7E"/>
+    </linearGradient>
+    <linearGradient id="city-light" x1="800" y1="320" x2="800" y2="740" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E6D8B6" stop-opacity=".76"/>
+      <stop offset="1" stop-color="#E6D8B6" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#city-sky)" d="M0 0h1600v900H0z"/>
+  <circle cx="1215" cy="180" r="82" fill="#F2E0BA" fill-opacity=".58"/>
+  <path fill="url(#city-light)" d="M0 290h1600v460H0z"/>
+  <path fill="#4E6670" fill-opacity=".72" d="M0 465h101v-83h69v83h38V330h105v135h47V405h74v60h47V294h111v171h46V359h82v106h34V267h122v198h49V342h94v123h48V305h112v160h48V382h72v83h46V322h111v143h40v435H0V465Z"/>
+  <path fill="#354F5D" d="M0 558h112v-50h92v50h60V437h121v121h43V492h82v66h35V392h125v166h47V458h80v100h52V375h135v183h45V468h115v90h41V420h119v138h48V485h99v73h56v342H0V558Z"/>
+  <path fill="#E8DDBF" fill-opacity=".78" d="M154 532h13v16h-13zm139-57h15v19h-15zm134 38h14v17h-14zm174-92h15v19h-15zm49 76h15v19h-15zm149-59h16v19h-16zm55 72h15v18h-15zm160-102h16v19h-16zm48 81h15v18h-15zm177-45h15v19h-15zm51 60h16v19h-16z"/>
+  <path fill="#B49B70" fill-opacity=".5" d="M0 727c207-78 378-61 557 0 162 56 308 57 458 0 177-68 347-57 585 21v152H0V727Z"/>
+  <path stroke="#D7D6C5" stroke-opacity=".35" stroke-width="4" d="M-10 698c210-76 385-57 569 5 157 53 300 51 447-6 184-72 359-58 604 22"/>
+  <path fill="#293F4A" fill-opacity=".68" d="M0 843c170-47 343-40 503 0 168 42 323 35 478-5 211-54 403-33 619 21v41H0v-57Z"/>
+</svg>

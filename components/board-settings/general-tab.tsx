@@ -5,7 +5,11 @@ import {
     Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GeneralFormValues } from "@/lib/models/models.types";
+import { Button } from "@/components/ui/button";
+import {
+    GeneralFormValues,
+    SAMPLE_BOARD_BACKGROUND_URL,
+} from "@/lib/models/models.types";
 
 
 const BOARD_COLORS = [
@@ -48,9 +52,35 @@ export default function GeneralTab({ values, onChange }: GeneralTabProps) {
             </div>
 
             <div className="space-y-2">
+                <Label htmlFor="board-background-image">Board background image URL</Label>
+                <Input
+                    id="board-background-image"
+                    type="url"
+                    placeholder="https://example.com/your-board-background.jpg"
+                    value={values.backgroundImageUrl}
+                    onChange={(e) =>
+                        onChange({ ...values, backgroundImageUrl: e.target.value })
+                    }
+                />
+                <p className="text-xs text-muted-foreground">
+                    Use a public image URL. Leave empty to use the sample ocean background.
+                </p>
+                <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                        onChange({ ...values, backgroundImageUrl: SAMPLE_BOARD_BACKGROUND_URL })
+                    }
+                >
+                    Use sample ocean background
+                </Button>
+            </div>
+
+            <div className="space-y-2">
                 <Label>Board accent color</Label>
                 <div className="flex flex-wrap gap-2 pt-1">
-                    {BOARD_COLORS.map((color, i) => (
+                    {BOARD_COLORS.map((color) => (
                         <button
                             key={color}
                             type="button"

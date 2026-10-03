@@ -63,6 +63,7 @@ export default function BoardSettingsDialog({
         name: board.name,
         description: board.description ?? "",
         themeColor: board.themeColor ?? "#e91e8c",
+        backgroundImageUrl: board.backgroundImageUrl ?? "",
     });
 
     const [columnValues, setColumnValues] = useState<ColumnFormValues>(
@@ -103,6 +104,7 @@ export default function BoardSettingsDialog({
                 name: board.name,
                 description: board.description ?? "",
                 themeColor: board.themeColor ?? "#e91e8c",
+                backgroundImageUrl: board.backgroundImageUrl ?? "",
             });
             setCardDisplayValues({
                 showSalary: board.settings?.cardDisplay?.showSalary ?? true,
@@ -131,6 +133,7 @@ export default function BoardSettingsDialog({
                     name: generalValues.name,
                     description: generalValues.description,
                     themeColor: generalValues.themeColor,
+                    backgroundImageUrl: generalValues.backgroundImageUrl,
                 });
                 if (result?.error) {
                     toast.error(result.error);
@@ -141,6 +144,7 @@ export default function BoardSettingsDialog({
                     name: generalValues.name.trim(),
                     description: generalValues.description.trim(),
                     themeColor: generalValues.themeColor,
+                    backgroundImageUrl: result.board?.backgroundImageUrl ?? generalValues.backgroundImageUrl,
                 });
                 toast.success("Board details updated");
             }

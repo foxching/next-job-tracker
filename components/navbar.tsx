@@ -8,9 +8,16 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 import SignOutButton from "./sign-out-btn";
 import ThemeToggle from "./theme-toggle";
 import { useSession } from "@/lib/auth/auth-client";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
     const { data: session } = useSession();
+    const pathname = usePathname();
+
+    if (pathname === "/dashboard") {
+        return null;
+    }
+
     return (
         <nav className="border-b border-border bg-background">
             <div className="w-full px-6 flex h-16 items-center justify-between max-w-full mx-auto">

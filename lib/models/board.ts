@@ -20,6 +20,8 @@ export interface IBoard extends Document {
     name: string;
     description: string;
     themeColor: string;
+    backgroundImageUrl: string;
+    backgroundImage?: string;
     userId: string;
     columns: mongoose.Types.ObjectId[];
     isActive?: boolean;
@@ -41,6 +43,13 @@ const BoardSchema = new Schema<IBoard>(
         themeColor: {
             type: String,
             default: "#7F77DD",
+        },
+        backgroundImageUrl: {
+            type: String,
+            default: "",
+        },
+        backgroundImage: {
+            type: String,
         },
         userId: {
             type: String,
@@ -90,6 +99,11 @@ const BoardSchema = new Schema<IBoard>(
         timestamps: true,
     }
 );
+
+const existingBoardModel = mongoose.models.Board;
+if (existingBoardModel && !existingBoardModel.schema.path("backgroundImageUrl")) {
+    delete mongoose.models.Board;
+}
 
 export default mongoose.models.Board ||
     mongoose.model<IBoard>("Board", BoardSchema);
