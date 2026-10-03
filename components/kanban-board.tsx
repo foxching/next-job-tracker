@@ -9,13 +9,16 @@ import CreateJobApplicationDialog from "./create-job-dialog";
 import CreateColumnDialog from "./create-column-dialog";
 import JobApplicationCard from "./job-application-card";
 import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import {
-    closestCorners,
+    CollisionDetection,
     DndContext,
     DragEndEvent,
     DragOverlay,
     DragStartEvent,
     PointerSensor,
+    pointerWithin,
+    rectIntersection,
     useSensor,
     useSensors,
 } from "@dnd-kit/core";
@@ -46,6 +49,17 @@ const SORT_FIELD_LABELS: Record<Exclude<SortingSettings["field"], "manual">, str
     createdAt: "Date added",
     company: "Company",
     position: "Position",
+};
+
+const kanbanCollisionDetection: CollisionDetection = (args) => {
+    const pointerCollisions = pointerWithin(args);
+    const jobCollision = pointerCollisions.find((collision) =>
+        args.droppableContainers.find((container) => container.id === collision.id)
+            ?.data.current?.type === "job"
+    );
+
+    if (jobCollision) return [jobCollision];
+    return pointerCollisions.length > 0 ? pointerCollisions : rectIntersection(args);
 };
 
 function sortJobs(jobs: JobApplication[], sorting: SortingSettings) {
@@ -87,6 +101,10 @@ function DroppableColumn({ column, boardId, sortedColumns, cardDisplay, filters,
     const [showEditColumnDialog, setShowEditColumnDialog] = useState(false);
     const jobs = column.jobApplications || [];
     const { setNodeRef, isOver } = useDroppable({ id: column._id, data: { type: "column", columnId: column._id } });
+    const visibleJobs = sortJobs(
+        jobs.filter((job) => matchesFilters(job, filters)),
+        sorting
+    );
 
     async function handleDelete() {
         if (jobs.length > 0) {
@@ -146,8 +164,8 @@ function DroppableColumn({ column, boardId, sortedColumns, cardDisplay, filters,
             </CardHeader>
             <div className={`kanban-column-content flex flex-col flex-1 min-h-0 rounded-b-xl overflow-hidden ${isOver ? "ring-2 ring-primary/60" : ""}`}>
                 <CardContent ref={setNodeRef} className="flex-1 min-h-0 overflow-y-auto space-y-2 px-2.5 py-2.5">
-                    <SortableContext items={jobs.map((j) => j._id)} strategy={verticalListSortingStrategy}>
-                        {sortJobs(jobs.filter((j) => matchesFilters(j, filters)), sorting).map((job) => (
+                    <SortableContext items={visibleJobs.map((job) => job._id)} strategy={verticalListSortingStrategy}>
+                        {visibleJobs.map((job) => (
                             <SortableJobCard key={job._id} job={{ ...job, columnId: job.columnId || column._id }} columns={sortedColumns} cardDisplay={cardDisplay} />
                         ))}
                     </SortableContext>
@@ -162,7 +180,7 @@ function DroppableColumn({ column, boardId, sortedColumns, cardDisplay, filters,
 
 function SortableJobCard({ job, columns, cardDisplay }: { job: JobApplication, columns: Column[], cardDisplay: CardDisplaySettings }) {
     const { attributes, listeners, transform, transition, isDragging, setNodeRef } = useSortable({ id: job._id, data: { type: "job", job } });
-    const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 };
+    const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0 : 1 };
     return (
         <div ref={setNodeRef} style={style}>
             <JobApplicationCard job={job} columns={columns} dragHandleProps={{ ...attributes, ...listeners }} cardDisplay={cardDisplay} />
@@ -187,7 +205,9 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
         direction: board?.settings?.sorting?.direction ?? "desc",
     };
 
-    const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 6 } })
+    );
 
     async function handleDragStart(event: DragStartEvent) {
         setActiveId(event.active.id as string);
@@ -196,7 +216,7 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
     async function handleDragEnd(event: DragEndEvent) {
         const { active, over } = event;
         setActiveId(null);
-        if (!over || !board?._id) return;
+        if (!over || !board?._id || active.id === over.id) return;
         const activeId = active.id as string;
         const overId = over.id as string;
 
@@ -205,7 +225,7 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
         let sourceIndex = -1;
 
         for (const column of sortedColumns) {
-            const jobs = [...(column.jobApplications || [])].sort((a, b) => a.order - b.order);
+            const jobs = sortJobs([...(column.jobApplications || [])], sorting);
             const jobIndex = jobs.findIndex((j) => j._id === activeId);
             if (jobIndex !== -1) {
                 draggedJob = jobs[jobIndex];
@@ -225,7 +245,10 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
 
         if (targetColumn) {
             targetColumnId = targetColumn._id;
-            const jobsInTarget = (targetColumn.jobApplications || []).filter((j) => j._id !== activeId).sort((a, b) => a.order - b.order) || [];
+            const jobsInTarget = sortJobs(
+                [...(targetColumn.jobApplications || [])].filter((job) => job._id !== activeId),
+                sorting
+            );
             newOrder = jobsInTarget.length;
         } else if (targetJob) {
             const targetJobColumn = sortedColumns.find((col) => (col.jobApplications || []).some((j) => j._id === targetJob._id));
@@ -233,8 +256,11 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
             if (!targetColumnId) return;
             const targetColumnObj = sortedColumns.find((col) => col._id === targetColumnId);
             if (!targetColumnObj) return;
-            const allJobsInTargetOriginal = [...(targetColumnObj.jobApplications || [])].sort((a, b) => a.order - b.order);
-            const allJobsInTargetFiltered = allJobsInTargetOriginal.filter((j) => j._id !== activeId) || [];
+            const allJobsInTargetOriginal = sortJobs(
+                [...(targetColumnObj.jobApplications || [])],
+                sorting
+            );
+            const allJobsInTargetFiltered = allJobsInTargetOriginal.filter((j) => j._id !== activeId);
             const targetIndexInOriginal = allJobsInTargetOriginal.findIndex((j) => j._id === overId);
             const targetIndexInFiltered = allJobsInTargetFiltered.findIndex((j) => j._id === overId);
             if (targetIndexInFiltered !== -1) {
@@ -255,6 +281,7 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
         }
 
         if (!targetColumnId || newOrder === undefined) return;
+        if (sourceColumn._id === targetColumnId && sourceIndex === newOrder) return;
 
         await moveJob(activeId, targetColumnId, newOrder);
     }
@@ -262,7 +289,7 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
     const activeJob = sortedColumns.flatMap((col) => col.jobApplications || []).find((job) => job._id === activeId);
 
     return (
-        <DndContext id="kanban-board-dnd" sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <DndContext id="kanban-board-dnd" sensors={sensors} collisionDetection={kanbanCollisionDetection} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
             <div className="flex flex-col gap-4 w-full h-full min-h-0 overflow-hidden">
                 {sortedColumns.length > 0 && sorting.field !== "manual" && (
                     <div className="flex items-center gap-1.5 px-2 text-sm text-muted-foreground shrink-0">
@@ -307,10 +334,21 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
                     </div>
                 )}
 
-                <DragOverlay>
-                    {activeJob ? <div className="opacity-50"><JobApplicationCard job={activeJob} columns={sortedColumns} cardDisplay={cardDisplay} /></div> : null}
-                </DragOverlay>
             </div>
+            {typeof document !== "undefined" &&
+                createPortal(
+                    <DragOverlay dropAnimation={{ duration: 180, easing: "ease" }}>
+                        {activeJob ? (
+                            <JobApplicationCard
+                                job={activeJob}
+                                columns={sortedColumns}
+                                cardDisplay={cardDisplay}
+                                isDragOverlay
+                            />
+                        ) : null}
+                    </DragOverlay>,
+                    document.body
+                )}
             {showAddColumnDialog && board && (
                 <CreateColumnDialog
                     boardId={board._id}

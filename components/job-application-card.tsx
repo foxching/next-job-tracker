@@ -2,7 +2,7 @@
 
 import { Column, JobApplication } from "@/lib/models/models.types";
 import { Card, CardContent } from "./ui/card";
-import { Award, Calendar, CheckCircle2, Edit2, ExternalLink, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { Award, Calendar, CheckCircle2, Edit2, ExternalLink, GripVertical, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-application";
@@ -42,6 +42,7 @@ interface JobApplicationCardProps {
     columns: Column[];
     dragHandleProps?: React.HTMLAttributes<HTMLElement>;
     cardDisplay: CardDisplaySettings;
+    isDragOverlay?: boolean;
 }
 
 function formatAppliedDate(date: string | Date) {
@@ -52,7 +53,7 @@ function formatAppliedDate(date: string | Date) {
     });
 }
 
-export default function JobApplicationCard({ job, columns, dragHandleProps, cardDisplay }: JobApplicationCardProps) {
+export default function JobApplicationCard({ job, columns, dragHandleProps, cardDisplay, isDragOverlay = false }: JobApplicationCardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isDescOpen, setIsDescOpen] = useState(false);
     const form = useForm<JobApplicationFormData>({
@@ -130,10 +131,15 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
     return (
         <>
             <Card
-                className="job-application-card w-full cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md group"
+                className={`job-application-card relative w-full cursor-pointer transition-shadow hover:shadow-md group ${isDragOverlay ? "pointer-events-none scale-[1.02] cursor-grabbing shadow-2xl ring-2 ring-primary/60" : ""}`}
                 {...dragHandleProps}
-                onClick={() => setIsDescOpen(true)}
+                onClick={isDragOverlay ? undefined : () => setIsDescOpen(true)}
             >
+                {isDragOverlay && (
+                    <span className="absolute -top-2 -right-2 z-10 flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-primary text-primary-foreground shadow-md">
+                        <GripVertical className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                )}
                 <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
