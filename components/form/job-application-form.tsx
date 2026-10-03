@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useFormContext } from "react-hook-form";
+import { RichTextEditor } from "@/components/rich-editor";
 
 export type JobApplicationFormData = {
     company: string;
@@ -135,20 +136,24 @@ export default function JobApplicationForm() {
 
             <div className="space-y-2 p-1 mt-4">
                 <Label htmlFor="description">Description</Label>
-                <Textarea
-                    id="description"
-                    rows={3}
+                <RichTextEditor
+                    value={getValues("description")}
+                    onChange={(value: any) => setValue("description", value)}
                     placeholder="Brief description of the role..."
-                    {...register("description")}
                 />
             </div>
 
             <div className="space-y-2 p-1 mt-4">
                 <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                    id="notes"
-                    rows={4}
-                    {...register("notes")}
+                <RichTextEditor
+                    value={getValues("notes") as string}
+                    onChange={(value) =>
+                        setValue("notes", value, {
+                            shouldDirty: true,
+                            shouldTouch: true,
+                        })
+                    }
+                    placeholder="Add notes about this application..."
                 />
             </div>
         </div>

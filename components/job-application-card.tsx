@@ -2,7 +2,7 @@
 
 import { Column, JobApplication } from "@/lib/models/models.types";
 import { Card, CardContent } from "./ui/card";
-import { Award, Calendar, CheckCircle2, Edit2, ExternalLink, GripVertical, Mic, MoreVertical, Trash2, XCircle } from "lucide-react";
+import { Award, Banknote, BriefcaseBusiness, Building2, Calendar, CheckCircle2, Edit2, ExternalLink, FileText, GripVertical, MapPin, Mic, MoreVertical, Tags, Trash2, XCircle } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
 import { deleteJobApplication, updateJobApplication } from "@/lib/actions/job-application";
@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import JobApplicationForm, { JobApplicationFormData } from "./form/job-application-form";
 import { useBoardContext } from "./board-provider";
 import { FormProvider, useForm } from "react-hook-form";
+import { RichTextDisplay } from "./rich-editor";
 
 type CardDisplaySettings = {
     showSalary: boolean;
@@ -51,6 +52,28 @@ function formatAppliedDate(date: string | Date) {
         day: "numeric",
         year: "numeric",
     });
+}
+
+function DetailField({
+    icon,
+    label,
+    children,
+}: {
+    icon: React.ReactNode;
+    label: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="flex min-w-0 items-start gap-3 rounded-lg border bg-muted/20 p-3">
+            <span className="mt-0.5 shrink-0 text-muted-foreground">{icon}</span>
+            <div className="min-w-0">
+                <p className="text-xs font-medium text-muted-foreground">{label}</p>
+                <div className="mt-1 break-words text-sm font-medium text-foreground">
+                    {children}
+                </div>
+            </div>
+        </div>
+    );
 }
 
 export default function JobApplicationCard({ job, columns, dragHandleProps, cardDisplay, isDragOverlay = false }: JobApplicationCardProps) {
@@ -265,60 +288,92 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                 </CardContent>
             </Card>
             <Dialog open={isDescOpen} onOpenChange={setIsDescOpen}>
-                <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">
-                    <DialogHeader>
+                <DialogContent className="flex max-h-[90vh] max-w-3xl flex-col">
+                    <DialogHeader className="shrink-0">
                         <DialogTitle className="text-lg font-semibold">{job.position}</DialogTitle>
-                        <DialogDescription className="text-sm text-muted-foreground">
-                            <p>{job.company}</p>
-                            <p>{job.location}</p>
-                            <p className="text-black-10">{job.salary}</p>
-                        </DialogDescription>
+                        <DialogDescription>{job.company}</DialogDescription>
                     </DialogHeader>
-                    <div>
-                        {job.description && (
-                            <div className="mt-4">
-                                <small className="text-sm text-muted-foreground">Job Description</small>
-                                <p className="text-sm text-foreground whitespace-pre-wrap">{job.description}</p>
-                            </div>
-                        )}
-                        {job.notes && (
-                            <div className="mt-4">
-                                <small className="text-sm text-muted-foreground">Job Notes</small>
-                                <p className="text-sm text-foreground whitespace-pre-wrap">{job.notes}</p>
-                            </div>
-                        )}
+                    <div className="min-h-0 flex-1 space-y-5 overflow-y-auto pr-1">
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <DetailField icon={<Building2 className="h-4 w-4" />} label="Company">
+                                {job.company}
+                            </DetailField>
+                            <DetailField icon={<BriefcaseBusiness className="h-4 w-4" />} label="Position">
+                                {job.position}
+                            </DetailField>
+                            {job.location && (
+                                <DetailField icon={<MapPin className="h-4 w-4" />} label="Location">
+                                    {job.location}
+                                </DetailField>
+                            )}
+                            {job.salary && (
+                                <DetailField icon={<Banknote className="h-4 w-4" />} label="Salary">
+                                    {job.salary}
+                                </DetailField>
+                            )}
+                            {job.appliedDate && (
+                                <DetailField icon={<Calendar className="h-4 w-4" />} label="Applied date">
+                                    {formatAppliedDate(job.appliedDate)}
+                                </DetailField>
+                            )}
+                            {job.jobUrl && (
+                                <DetailField icon={<ExternalLink className="h-4 w-4" />} label="Job posting">
+                                    <a
+                                        href={job.jobUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline"
+                                        onClick={(event) => event.stopPropagation()}
+                                    >
+                                        Open job posting
+                                    </a>
+                                </DetailField>
+                            )}
+                        </div>
                         {job.tags && job.tags.length > 0 && (
-                            <div className="mt-4">
-                                <small className="text-sm text-muted-foreground">Tags</small>
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {job.tags.map((tag, i) => (
+                            <section className="space-y-2">
+                                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                                    <Tags className="h-4 w-4 text-muted-foreground" />
+                                    Tags
+                                </h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {job.tags.map((tag, index) => (
                                         <span
-                                            key={i}
+                                            key={`${tag}-${index}`}
                                             style={{
                                                 backgroundColor: getTagColor(tag).background,
                                                 color: getTagColor(tag).foreground,
                                             }}
-                                            className="rounded-full px-2 py-1 text-sm"
+                                            className="rounded-full px-2.5 py-1 text-xs font-medium"
                                         >
                                             {tag}
                                         </span>
                                     ))}
                                 </div>
-                            </div>
+                            </section>
                         )}
-                        <div className="mt-4">
-                            <small className="text-sm text-muted-foreground ml-2">Source</small>
-                            {job.jobUrl && (
-                                <a
-                                    href={job.jobUrl}
-                                    target="_blank"
-                                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1 mr-2"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <ExternalLink className="h-3 w-3" />
-                                </a>
-                            )}
-                        </div>
+                        {job.description && (
+                            <section className="space-y-2">
+                                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                    Job description
+                                </h3>
+                                <div className="rounded-lg border bg-muted/20 p-4">
+                                    <RichTextDisplay value={job.description} />
+                                </div>
+                            </section>
+                        )}
+                        {job.notes && (
+                            <section className="space-y-2">
+                                <h3 className="flex items-center gap-2 text-sm font-semibold">
+                                    <FileText className="h-4 w-4 text-muted-foreground" />
+                                    Notes
+                                </h3>
+                                <div className="rounded-lg border bg-muted/20 p-4">
+                                    <RichTextDisplay value={job.notes} />
+                                </div>
+                            </section>
+                        )}
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsDescOpen(false)}>Close</Button>
