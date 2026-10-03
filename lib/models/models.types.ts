@@ -8,6 +8,15 @@ export type SortDirection =
     | "asc"
     | "desc";
 
+export const BOARD_BACKGROUND_OPTIONS = [
+    { label: "Ocean", image: "/ocean-board-background.svg" },
+    { label: "Nature", image: "/nature-board-background.svg" },
+    { label: "Mountains", image: "/mountains-board-background.svg" },
+    { label: "City", image: "/city-board-background.svg" },
+] as const;
+
+export const SAMPLE_BOARD_BACKGROUND_URL = BOARD_BACKGROUND_OPTIONS[0].image;
+
 export interface JobApplication {
     _id: string;
     company: string;
@@ -39,6 +48,7 @@ export interface Board {
     name: string;
     description?: string;
     themeColor?: string;
+    backgroundImageUrl?: string;
     columns: Column[];
     isActive: boolean;
     settings?: {
@@ -59,6 +69,7 @@ export type GeneralFormValues = {
     name: string;
     description: string;
     themeColor: string;
+    backgroundImageUrl: string;
 };
 
 export type CardDisplayFormValues = {

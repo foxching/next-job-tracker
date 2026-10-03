@@ -22,6 +22,7 @@ import type { JobApplicationFormData } from "./form/job-application-form";
 interface CreateJobApplicationDialogProps {
     columnId: string;
     boardId: string;
+    iconOnly?: boolean;
 }
 
 const INITIAL_FORM_DATA = {
@@ -36,7 +37,7 @@ const INITIAL_FORM_DATA = {
     description: "",
 };
 
-export default function CreateJobApplicationDialog({ columnId, boardId }: CreateJobApplicationDialogProps) {
+export default function CreateJobApplicationDialog({ columnId, boardId, iconOnly = false }: CreateJobApplicationDialogProps) {
     const [open, setOpen] = useState(false);
     const form = useForm<JobApplicationFormData>({
         defaultValues: INITIAL_FORM_DATA,
@@ -75,11 +76,16 @@ export default function CreateJobApplicationDialog({ columnId, boardId }: Create
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button
-                    variant="outline"
-                    className="w-full mb-4 justify-start text-foreground/60 border-dashed border-2 border-border hover:border-solid hover:bg-muted/30"
+                    variant={iconOnly ? "ghost" : "outline"}
+                    size={iconOnly ? "icon" : "default"}
+                    className={iconOnly
+                        ? "h-7 w-7 rounded-lg border border-transparent bg-transparent text-foreground/70 shadow-none hover:border-white/50 hover:bg-white/35 hover:text-foreground"
+                        : "mb-4 w-full justify-start border-2 border-dashed border-border text-foreground/60 hover:border-solid hover:bg-muted/30"}
+                    aria-label={iconOnly ? "Add application" : undefined}
+                    title={iconOnly ? "Add application" : undefined}
                 >
-                    <Plus />
-                    Add Job
+                    <Plus aria-hidden="true" />
+                    {!iconOnly && "Add Job"}
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <defs>
+    <linearGradient id="alpine-sky" x1="800" y1="0" x2="800" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8FC4D2"/>
+      <stop offset=".58" stop-color="#D6DCCB"/>
+      <stop offset="1" stop-color="#8BA7A0"/>
+    </linearGradient>
+    <linearGradient id="mountain" x1="800" y1="300" x2="800" y2="870" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#647F83"/>
+      <stop offset="1" stop-color="#344E55"/>
+    </linearGradient>
+    <linearGradient id="valley" x1="800" y1="570" x2="800" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#759985"/>
+      <stop offset="1" stop-color="#385D4D"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#alpine-sky)" d="M0 0h1600v900H0z"/>
+  <circle cx="1218" cy="166" r="76" fill="#F5E8C4" fill-opacity=".7"/>
+  <path fill="#A8B9B1" d="m0 608 199-202 88 91 202-270 174 201 161-163 103 114 171-204 270 313 232-183v595H0V608Z"/>
+  <path fill="#E6E8DC" fill-opacity=".93" d="m489 227 75 87 69-51 30 65-88-33-49 50-60-61-37 48-57 3 117-108Zm448 47 94-113 50 75 51-29 25 55-62-21-53 41-45-48-60 40Zm-698 132 54-71 39 54-44-18-31 28-18-20Z"/>
+  <path fill="url(#mountain)" d="m0 666 287-236 161 170 252-293 200 267 198-166 150 166 182-204 170 154v376H0V666Z"/>
+  <path fill="#D5D9CE" fill-opacity=".68" d="m448 600 252-293 104 139-107-52-54 43-37-45-78 106-80 102Zm800-26 182-204 103 94-96-34-73 57-39-27-77 114Z"/>
+  <path fill="url(#valley)" d="M0 704c197-73 340-54 504 22 143 66 261 86 405 34 185-67 302-115 472-57 85 29 149 54 219 49v148H0V704Z"/>
+  <path fill="#9DBB98" fill-opacity=".6" d="M0 801c147-76 292-63 431-13 155 56 267 83 413 39 174-53 315-111 473-54 114 40 188 70 283 60v67H0v-99Z"/>
+  <path stroke="#E5E6D5" stroke-opacity=".45" stroke-width="4" d="M-28 739c194-71 346-49 516 28 144 65 270 85 420 30 181-67 294-112 464-56 92 30 161 59 258 48"/>
+</svg>

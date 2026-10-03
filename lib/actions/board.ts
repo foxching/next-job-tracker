@@ -8,11 +8,16 @@ import { Board, Column, JobApplication } from "../models";
 import { ExportBoardError, ExportBoardResult, ExportedBoard, ExportedJob, ExportedColumn, SortField, DuplicateBoardResult, DuplicateBoardError, DeleteBoardResult, DeleteBoardError } from "../models/models.types";
 import { SortDirection } from "mongodb";
 import mongoose from "mongoose";
+import {
+    BOARD_BACKGROUND_OPTIONS,
+    SAMPLE_BOARD_BACKGROUND_URL,
+} from "../models/models.types";
 
 type UpdateBoardDetailsInput = {
     name: string;
     description?: string;
     themeColor?: string;
+    backgroundImageUrl?: string;
 };
 
 type UpdateCardDisplayInput = {
@@ -145,7 +150,7 @@ export async function updateBoardName(boardId: string, name: string) {
 
 export async function updateBoardDetails(
     boardId: string,
-    { name, description, themeColor }: UpdateBoardDetailsInput
+    { name, description, themeColor, backgroundImageUrl }: UpdateBoardDetailsInput
 ) {
     const session = await getSession();
 
@@ -155,6 +160,28 @@ export async function updateBoardDetails(
 
     if (!name || name.trim() === "") {
         return { error: "Board name cannot be empty" };
+    }
+
+    const trimmedBackgroundImage = backgroundImageUrl?.trim() ?? "";
+    if (trimmedBackgroundImage.length > 2048) {
+        return { error: "Background image URL must be 2048 characters or fewer." };
+    }
+
+    let normalizedBackgroundImage = "";
+    if (trimmedBackgroundImage) {
+        if (trimmedBackgroundImage === SAMPLE_BOARD_BACKGROUND_URL) {
+            normalizedBackgroundImage = SAMPLE_BOARD_BACKGROUND_URL;
+        } else {
+            try {
+                const parsedBackgroundImage = new URL(trimmedBackgroundImage);
+                if (!["http:", "https:"].includes(parsedBackgroundImage.protocol)) {
+                    return { error: "Background image URL must use HTTP or HTTPS." };
+                }
+                normalizedBackgroundImage = parsedBackgroundImage.toString();
+            } catch {
+                return { error: "Enter a valid background image URL." };
+            }
+        }
     }
 
     await connectDB();
@@ -172,9 +199,13 @@ export async function updateBoardDetails(
         const updatedBoard = await Board.findByIdAndUpdate(
             boardId,
             {
-                name: name.trim(),
-                description: description?.trim() ?? "",
-                themeColor,
+                $set: {
+                    name: name.trim(),
+                    description: description?.trim() ?? "",
+                    themeColor,
+                    backgroundImageUrl: normalizedBackgroundImage,
+                },
+                $unset: { backgroundImage: 1 },
             },
             {
                 new: true,
@@ -188,6 +219,49 @@ export async function updateBoardDetails(
     } catch (error) {
         console.error("Error updating board details:", error);
         return { error: "Failed to update board details" };
+    }
+}
+
+export async function updateBoardBackground(boardId: string, backgroundImageUrl: string) {
+    const session = await getSession();
+
+    if (!session?.user) {
+        return { error: "Unauthorized" };
+    }
+
+    if (!BOARD_BACKGROUND_OPTIONS.some((option) => option.image === backgroundImageUrl)) {
+        return { error: "Choose a background from the available options." };
+    }
+
+    await connectDB();
+
+    try {
+        const updatedBoard = await Board.findOneAndUpdate(
+            { _id: boardId, userId: session.user.id },
+            {
+                $set: { backgroundImageUrl },
+                $unset: { backgroundImage: 1 },
+            },
+            { new: true }
+        ).select("_id backgroundImageUrl");
+
+        if (!updatedBoard) {
+            return { error: "Board not found" };
+        }
+
+        if (updatedBoard.backgroundImageUrl !== backgroundImageUrl) {
+            console.error("Board background update did not persist", {
+                boardId,
+                requestedBackground: backgroundImageUrl,
+                savedBackground: updatedBoard.backgroundImageUrl,
+            });
+            return { error: "Background change was not saved. Please try again." };
+        }
+
+        return { success: true, backgroundImageUrl: updatedBoard.backgroundImageUrl };
+    } catch (error) {
+        console.error("Error updating board background:", error);
+        return { error: "Failed to update board background." };
     }
 }
 
@@ -656,6 +730,3 @@ export async function deleteBoardAction(
         mongoSession.endSession();
     }
 }
-
-
-

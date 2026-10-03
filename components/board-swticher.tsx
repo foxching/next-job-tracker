@@ -48,7 +48,7 @@ export default function BoardSwitcher({ boards }: BoardSwitcherProps) {
                 <DropdownMenuTrigger asChild>
                     <Button
                         variant="outline"
-                        className="inline-flex items-center gap-2"
+                        className="inline-flex items-center gap-2 text-sm font-medium tracking-[-0.01em]"
                         disabled={isSwitching}
                     >
                         <LayoutDashboard className="w-4 h-4 mr-2" />
@@ -56,7 +56,7 @@ export default function BoardSwitcher({ boards }: BoardSwitcherProps) {
                         <ChevronDown className="h-4 w-4" />
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-52">
                     {visibleBoards.length > 0 && visibleBoards.map((board) => (
                         <DropdownMenuItem
                             key={board._id}

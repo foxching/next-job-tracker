@@ -1,7 +1,7 @@
 "use client";
 
 import { Board, Column, JobApplication } from "@/lib/models/models.types";
-import { Award, Calendar, CheckCircle2, Edit2, Mic, MoreVertical, Trash2, XCircle, ArrowUpDown } from "lucide-react";
+import { Edit2, MoreVertical, Trash2, ArrowUpDown, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu";
 import { Button } from "./ui/button";
@@ -30,39 +30,22 @@ import { deleteColumn } from "@/lib/actions/column";
 import { toast } from "sonner";
 import { useBoardContext } from "./board-provider";
 
-interface ColConfig {
-    color: string;
-    icon: React.ReactNode;
-}
-
-function getColumnColorStyle(color: string) {
-    return color.startsWith("#") || color.startsWith("rgb") || color.startsWith("hsl")
-        ? { backgroundColor: color }
-        : undefined;
-}
-
 type CardDisplaySettings =
     NonNullable<NonNullable<Board["settings"]>["cardDisplay"]>;
 type SortingSettings = NonNullable<NonNullable<Board["settings"]>["sorting"]>;
+type BoardFilters = {
+    query: string;
+    selectedColumns: string[];
+    selectedTags: string[];
+    hasSalary: "all" | "with-salary" | "without-salary";
+    hasNotes: "all" | "with-notes" | "without-notes";
+};
 
 // human-readable labels for sorting
 const SORT_FIELD_LABELS: Record<Exclude<SortingSettings["field"], "manual">, string> = {
     createdAt: "Date added",
     company: "Company",
     position: "Position",
-};
-
-const ICON_MAP: Record<string, React.ReactNode> = {
-    Calendar: <Calendar className="h-4 w-4" />,
-    CheckCircle2: <CheckCircle2 className="h-4 w-4" />,
-    Mic: <Mic className="h-4 w-4" />,
-    Award: <Award className="h-4 w-4" />,
-    XCircle: <XCircle className="h-4 w-4" />,
-};
-
-const DEFAULT_COLUMN_CONFIG: ColConfig = {
-    color: "bg-cyan-500",
-    icon: <Calendar className="h-4 w-4" />,
 };
 
 function sortJobs(jobs: JobApplication[], sorting: SortingSettings) {
@@ -77,7 +60,7 @@ function sortJobs(jobs: JobApplication[], sorting: SortingSettings) {
     return sorted;
 }
 
-function matchesFilters(job: JobApplication, filters: any) {
+function matchesFilters(job: JobApplication, filters?: BoardFilters) {
     if (!filters) return true;
     const q = (filters.query || "").toLowerCase().trim();
     if (q) {
@@ -85,11 +68,11 @@ function matchesFilters(job: JobApplication, filters: any) {
         if (!hay.includes(q)) return false;
     }
     if (filters.selectedColumns && filters.selectedColumns.length > 0) {
-        if (!filters.selectedColumns.includes(job.columnId)) return false;
+        if (!job.columnId || !filters.selectedColumns.includes(job.columnId)) return false;
     }
     if (filters.selectedTags && filters.selectedTags.length > 0) {
         const tags = job.tags || [];
-        const hasAny = filters.selectedTags.some((t: string) => tags.includes(t));
+        const hasAny = filters.selectedTags.some((tag) => tags.includes(tag));
         if (!hasAny) return false;
     }
     if (filters.hasSalary === "with-salary" && !job.salary) return false;
@@ -99,7 +82,7 @@ function matchesFilters(job: JobApplication, filters: any) {
     return true;
 }
 
-function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, filters, sorting }: { column: Column, config: ColConfig, boardId: string, sortedColumns: Column[], cardDisplay: CardDisplaySettings, filters?: any, sorting: SortingSettings }) {
+function DroppableColumn({ column, boardId, sortedColumns, cardDisplay, filters, sorting }: { column: Column, boardId: string, sortedColumns: Column[], cardDisplay: CardDisplaySettings, filters?: BoardFilters, sorting: SortingSettings }) {
     const { removeColumn } = useBoardContext();
     const [showEditColumnDialog, setShowEditColumnDialog] = useState(false);
     const jobs = column.jobApplications || [];
@@ -124,46 +107,51 @@ function DroppableColumn({ column, config, boardId, sortedColumns, cardDisplay, 
     }
 
     return (
-        <Card className="min-w-[290px] max-w-[290px] h-full flex-shrink-0 shadow-md p-0 flex flex-col">
+        <Card className="kanban-column h-full min-h-0 p-0 flex flex-col">
             <CardHeader
-                className={`${config.color.startsWith("#") ? "" : config.color} text-white rounded-t-lg pb-3 pt-3 relative`}
-                style={getColumnColorStyle(config.color)}
+                className="kanban-column-header rounded-t-xl px-3 pb-2.5 pt-3"
             >
-                <div className=" flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        {config.icon}
-                        <CardTitle className="text-white text-base font-semibold">{column.name}</CardTitle>
+                <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                        <CardTitle className="truncate text-[15px] font-semibold tracking-[-0.02em] text-white">{column.name}</CardTitle>
+                        <span className="rounded-full border border-white/40 px-2 py-0.5 text-[11px] font-medium tabular-nums tracking-wide text-white">
+                            {jobs.length}
+                        </span>
                     </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 text-white hover:bg-white/20" >
-                                <MoreVertical className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setShowEditColumnDialog(true)}>
-                                <Edit2 className="mr-2 h-4 w-4" />
-                                Edit
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex shrink-0 items-center gap-0.5">
+                        <CreateJobApplicationDialog
+                            columnId={column._id}
+                            boardId={boardId}
+                            iconOnly
+                        />
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7 text-white hover:bg-white/15 hover:text-white">
+                                    <MoreVertical className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem className="text-destructive" onClick={handleDelete}>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => setShowEditColumnDialog(true)}>
+                                    <Edit2 className="mr-2 h-4 w-4" />
+                                    Edit
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
             </CardHeader>
-            <div className={`flex flex-col gap-2 flex-1 min-h-0 bg-muted/20 rounded-b-lg overflow-hidden ${isOver ? "ring-2 ring-blue-500" : ""}`}>
-                <CardContent ref={setNodeRef} className="flex-1 min-h-0 overflow-y-auto space-y-2 pt-2 pb-2">
+            <div className={`kanban-column-content flex flex-col flex-1 min-h-0 rounded-b-xl overflow-hidden ${isOver ? "ring-2 ring-primary/60" : ""}`}>
+                <CardContent ref={setNodeRef} className="flex-1 min-h-0 overflow-y-auto space-y-2 px-2.5 py-2.5">
                     <SortableContext items={jobs.map((j) => j._id)} strategy={verticalListSortingStrategy}>
                         {sortJobs(jobs.filter((j) => matchesFilters(j, filters)), sorting).map((job) => (
                             <SortableJobCard key={job._id} job={{ ...job, columnId: job.columnId || column._id }} columns={sortedColumns} cardDisplay={cardDisplay} />
                         ))}
                     </SortableContext>
                 </CardContent>
-                <div className="border-t border-border p-2 bg-muted/10">
-                    <CreateJobApplicationDialog columnId={column._id} boardId={boardId} />
-                </div>
             </div>
             {showEditColumnDialog && (
                 <CreateColumnDialog boardId={boardId} column={column} open={showEditColumnDialog} onOpenChange={setShowEditColumnDialog} />
@@ -182,8 +170,9 @@ function SortableJobCard({ job, columns, cardDisplay }: { job: JobApplication, c
     );
 }
 
-export default function KanbanBoard({ externalFilters, setExternalFilters }: { externalFilters?: any; setExternalFilters?: any }) {
+export default function KanbanBoard({ externalFilters }: { externalFilters?: BoardFilters }) {
     const [activeId, setActiveId] = useState<string | null>(null);
+    const [showAddColumnDialog, setShowAddColumnDialog] = useState(false);
     const { board, columns, moveJob } = useBoardContext();
     const sortedColumns = useMemo(() => [...(columns || [])].sort((a, b) => a.order - b.order), [columns]);
 
@@ -283,17 +272,34 @@ export default function KanbanBoard({ externalFilters, setExternalFilters }: { e
                 )}
 
                 {sortedColumns.length > 0 ? (
-                    <div className="flex-1 min-h-0 flex gap-4 overflow-x-auto overflow-y-hidden pb-4 p-2 w-full items-start">
+                    <div className="kanban-columns flex-1 min-h-0 overflow-x-auto overflow-y-hidden pb-3 w-full">
                         {sortedColumns.map((col) => {
-                            const config: ColConfig = { color: col.color || DEFAULT_COLUMN_CONFIG.color, icon: ICON_MAP[col.icon || "Calendar"] || DEFAULT_COLUMN_CONFIG.icon };
-                            return <DroppableColumn key={col._id} column={col} config={config} boardId={board?._id ?? ""} sortedColumns={sortedColumns} cardDisplay={cardDisplay} filters={externalFilters} sorting={sorting} />;
+                            return <DroppableColumn key={col._id} column={col} boardId={board?._id ?? ""} sortedColumns={sortedColumns} cardDisplay={cardDisplay} filters={externalFilters} sorting={sorting} />;
                         })}
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            className="kanban-add-column h-10 w-full justify-center rounded-lg text-sm font-medium"
+                            onClick={() => setShowAddColumnDialog(true)}
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add new list
+                        </Button>
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 flex items-center justify-center py-20 text-center">
                         <div>
                             <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300">No columns found</h2>
                             <p className="mt-2 text-sm text-gray-500">Create your first column to start organizing your job applications.</p>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="kanban-add-column mt-5 h-10 rounded-lg px-5 text-sm font-medium"
+                                onClick={() => setShowAddColumnDialog(true)}
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add new list
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -302,6 +308,13 @@ export default function KanbanBoard({ externalFilters, setExternalFilters }: { e
                     {activeJob ? <div className="opacity-50"><JobApplicationCard job={activeJob} columns={sortedColumns} cardDisplay={cardDisplay} /></div> : null}
                 </DragOverlay>
             </div>
+            {showAddColumnDialog && board && (
+                <CreateColumnDialog
+                    boardId={board._id}
+                    open={showAddColumnDialog}
+                    onOpenChange={setShowAddColumnDialog}
+                />
+            )}
         </DndContext>
     );
 }

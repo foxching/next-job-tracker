@@ -23,6 +23,9 @@ async function getBoard(userId: string) {
     if (!boardDoc) return null;
 
     const board = JSON.parse(JSON.stringify(boardDoc));
+    board.backgroundImageUrl =
+        board.backgroundImageUrl || board.backgroundImage || "";
+    delete board.backgroundImage;
 
     return board;
 }
@@ -53,8 +56,8 @@ async function DashboardPage() {
     }
 
     return (
-        <div className="h-[calc(100vh-5rem)] bg-background text-foreground overflow-x-auto overflow-y-hidden">
-            < div className="flex h-full flex-col w-full px-2 py-2" >
+        <div className="dashboard-page h-dvh w-full overflow-x-hidden overflow-y-hidden text-foreground">
+            <div className="flex h-full w-full flex-col">
                 {board ? (
                     <DashboardBoardShell board={board} boards={boards} />
                 ) : (
@@ -69,8 +72,8 @@ async function DashboardPage() {
                         </div>
                     </>
                 )}
-            </div >
-        </div >
+            </div>
+        </div>
     )
 }
 export default async function Dashboard() {

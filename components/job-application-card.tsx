@@ -19,6 +19,24 @@ type CardDisplaySettings = {
     showTags: boolean;
 };
 
+const TAG_COLORS = [
+    { background: "#dbeafe", foreground: "#1d4ed8" },
+    { background: "#dcfce7", foreground: "#15803d" },
+    { background: "#fef3c7", foreground: "#b45309" },
+    { background: "#fce7f3", foreground: "#be185d" },
+    { background: "#ede9fe", foreground: "#6d28d9" },
+    { background: "#cffafe", foreground: "#0e7490" },
+    { background: "#ffedd5", foreground: "#c2410c" },
+];
+
+function getTagColor(tag: string) {
+    const hash = Array.from(tag.toLowerCase()).reduce(
+        (value, character) => (value * 31 + character.charCodeAt(0)) >>> 0,
+        0
+    );
+    return TAG_COLORS[hash % TAG_COLORS.length];
+}
+
 interface JobApplicationCardProps {
     job: JobApplication;
     columns: Column[];
@@ -112,26 +130,26 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
     return (
         <>
             <Card
-                className="w-[320px] min-w-[250px] max-w-[250px] cursor-pointer transition-shadow hover:shadow-lg bg-card group shadow-sm"
+                className="job-application-card w-full cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-md group"
                 {...dragHandleProps}
                 onClick={() => setIsDescOpen(true)}
             >
-                <CardContent className="p-2">
+                <CardContent className="p-3">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm mb-0.5 truncate">{job.position}</h3>
-                            <p className="text-xs text-muted-foreground mb-1.5 truncate">
+                            <h3 className="mb-1 truncate text-[15px] font-semibold leading-snug tracking-[-0.02em] text-foreground">{job.position}</h3>
+                            <p className="mb-2 truncate text-[13px] font-medium tracking-[-0.01em] text-muted-foreground">
                                 {job.company}
                             </p>
 
                             <div className="flex flex-col gap-0.5 mb-1">
                                 {cardDisplay.showSalary && job.salary && (
-                                    <span className="text-xs font-bold text-foreground">
+                                    <span className="text-[13px] font-semibold tracking-[-0.01em] text-foreground">
                                         {job.salary}
                                     </span>
                                 )}
                                 {cardDisplay.showAppliedDate && job.appliedDate && (
-                                    <span className="text-xs text-muted-foreground">
+                                    <span className="text-xs leading-relaxed text-muted-foreground">
                                         Applied {formatAppliedDate(job.appliedDate)}
                                     </span>
                                 )}
@@ -143,13 +161,15 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                                         {(showAllTags ? job.tags : job.tags.slice(0, 2)).map((tag, i) => (
                                             <span
                                                 key={i}
+                                                style={{
+                                                    backgroundColor: getTagColor(tag).background,
+                                                    color: getTagColor(tag).foreground,
+                                                }}
                                                 className="
                                                     max-w-[100px]
                                                     px-2 py-1
-                                                    text-xs
+                                                    text-[11px] font-medium tracking-[0.01em]
                                                     rounded-full
-                                                    bg-blue-100
-                                                    text-blue-700
                                                     overflow-hidden
                                                     text-ellipsis
                                                     whitespace-nowrap
@@ -165,7 +185,7 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                                         <Button
                                             variant="link"
                                             size="sm"
-                                            className="h-auto p-0 mt-2 text-xs text-blue-700 hover:underline"
+                                            className="mt-2 h-auto p-0 text-xs font-medium text-blue-700 hover:underline"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setShowAllTags(!showAllTags);
@@ -266,7 +286,16 @@ export default function JobApplicationCard({ job, columns, dragHandleProps, card
                                 <small className="text-sm text-muted-foreground">Tags</small>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                     {job.tags.map((tag, i) => (
-                                        <span key={i} className="px-2 py-1 text-sm rounded-full bg-blue-100 text-blue-700">{tag}</span>
+                                        <span
+                                            key={i}
+                                            style={{
+                                                backgroundColor: getTagColor(tag).background,
+                                                color: getTagColor(tag).foreground,
+                                            }}
+                                            className="rounded-full px-2 py-1 text-sm"
+                                        >
+                                            {tag}
+                                        </span>
                                     ))}
                                 </div>
                             </div>
