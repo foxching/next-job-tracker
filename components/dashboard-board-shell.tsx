@@ -1,6 +1,6 @@
 "use client";
 
-import { Filter, Columns3, ArrowUpDown, LayoutDashboard } from "lucide-react";
+import { ArrowUpDown, Briefcase, Columns3, Filter, LayoutDashboard, Search, UserRound } from "lucide-react";
 import { Board, SAMPLE_BOARD_BACKGROUND_URL } from "@/lib/models/models.types";
 import { BoardProvider, useBoardContext } from "./board-provider";
 import BoardMenu from "./board-menu";
@@ -13,6 +13,8 @@ import { useState } from "react";
 import CreateColumnDialog from "./create-column-dialog";
 import { cn } from "@/lib/utils";
 import CreateJobApplicationDialog from "./create-job-dialog";
+import Link from "next/link";
+import ThemeToggle from "./theme-toggle";
 
 function DashboardBoardContent({ boards }: { boards: Board[] }) {
     const { board, isSwitchingBoard, columns } = useBoardContext();
@@ -30,16 +32,54 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
         <>
             <section
                 className={cn(
-                    "dashboard-workspace relative isolate flex h-full min-h-0 w-full flex-col overflow-hidden px-2 pb-3 pt-2 sm:px-3 sm:pb-5 sm:pt-3",
+                    "dashboard-workspace relative isolate flex h-full min-h-0 w-full flex-col overflow-hidden pb-1 sm:pb-2",
                     isSwitchingBoard && "opacity-90"
                 )}
                 style={{
                     backgroundImage: `linear-gradient(120deg, rgba(16, 32, 40, 0.18), rgba(16, 32, 40, 0.04)), url("${encodeURI(board.backgroundImageUrl || SAMPLE_BOARD_BACKGROUND_URL)}")`,
                 }}
             >
+                <header className="dashboard-topbar z-10 flex min-h-14 shrink-0 items-center gap-3 border-b px-3 py-2 sm:px-5">
+                    <Link
+                        href="/dashboard"
+                        className="flex shrink-0 items-center gap-2 rounded-md text-[15px] font-semibold tracking-tight text-white"
+                    >
+                        <Briefcase className="h-5 w-5 text-white" aria-hidden="true" />
+                        <span className="hidden sm:inline">Job Tracker</span>
+                    </Link>
+                    <label className="relative mx-auto flex h-9 min-w-0 max-w-3xl flex-1 items-center">
+                        <Search className="pointer-events-none absolute left-3 h-4 w-4 text-slate-500" aria-hidden="true" />
+                        <input
+                            type="search"
+                            value={filters.query}
+                            onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))}
+                            placeholder="Search applications"
+                            aria-label="Search job applications"
+                            className="h-full w-full rounded-md border border-slate-300 bg-white/80 pl-9 pr-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20"
+                        />
+                    </label>
+                    <CreateJobApplicationDialog
+                        boardId={board._id}
+                        columnId={[...columns].sort((a, b) => a.order - b.order)[0]?._id ?? ""}
+                        triggerLabel="Create"
+                        disabled={columns.length === 0}
+                    />
+                    <div className="flex shrink-0 items-center gap-1">
+                        <ThemeToggle />
+                        <Link
+                            href="/profile"
+                            aria-label="Profile"
+                            title="Profile"
+                            className="inline-flex h-8 items-center gap-2 rounded-md px-2 text-sm font-medium text-white transition hover:bg-white/15"
+                        >
+                            <UserRound className="h-4 w-4" aria-hidden="true" />
+                            <span className="hidden md:inline">Profile</span>
+                        </Link>
+                    </div>
+                </header>
                 <div
                     className={cn(
-                        "dashboard-board-toolbar mb-3 flex w-full shrink-0 flex-col gap-3 rounded-xl px-3 py-2 transition-opacity duration-200 ease-out md:flex-row md:items-center md:justify-between sm:px-4 sm:py-2.5",
+                        "dashboard-board-toolbar mx-2 mt-2 mb-3 flex w-[calc(100%-1rem)] shrink-0 flex-col gap-3 rounded-xl px-3 py-2 transition-opacity duration-200 ease-out sm:mx-3 sm:w-[calc(100%-1.5rem)] sm:px-4 sm:py-2.5 md:flex-row md:items-center md:justify-between",
                         isSwitchingBoard ? "opacity-60" : "opacity-100"
                     )}
                 >
@@ -50,13 +90,6 @@ function DashboardBoardContent({ boards }: { boards: Board[] }) {
                             initialName={board.name}
                         />
                         <BoardSwitcher boards={boards} />
-                        {columns.length > 0 && (
-                            <CreateJobApplicationDialog
-                                boardId={board._id}
-                                columnId={[...columns].sort((a, b) => a.order - b.order)[0]._id}
-                                iconOnly
-                            />
-                        )}
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         <Button
