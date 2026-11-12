@@ -23,6 +23,8 @@ interface CreateJobApplicationDialogProps {
     columnId: string;
     boardId: string;
     iconOnly?: boolean;
+    triggerLabel?: string;
+    disabled?: boolean;
 }
 
 const INITIAL_FORM_DATA = {
@@ -37,7 +39,13 @@ const INITIAL_FORM_DATA = {
     description: "",
 };
 
-export default function CreateJobApplicationDialog({ columnId, boardId, iconOnly = false }: CreateJobApplicationDialogProps) {
+export default function CreateJobApplicationDialog({
+    columnId,
+    boardId,
+    iconOnly = false,
+    triggerLabel,
+    disabled = false,
+}: CreateJobApplicationDialogProps) {
     const [open, setOpen] = useState(false);
     const form = useForm<JobApplicationFormData>({
         defaultValues: INITIAL_FORM_DATA,
@@ -80,12 +88,15 @@ export default function CreateJobApplicationDialog({ columnId, boardId, iconOnly
                     size={iconOnly ? "icon" : "default"}
                     className={iconOnly
                         ? "h-7 w-7 rounded-lg border border-transparent bg-transparent text-foreground/70 shadow-none hover:border-white/50 hover:bg-white/35 hover:text-foreground"
-                        : "mb-4 w-full justify-start border-2 border-dashed border-border text-foreground/60 hover:border-solid hover:bg-muted/30"}
+                        : triggerLabel
+                            ? "h-9 shrink-0 border-slate-300 bg-white text-slate-800 hover:bg-slate-100"
+                            : "mb-4 w-full justify-start border-2 border-dashed border-border text-foreground/60 hover:border-solid hover:bg-muted/30"}
                     aria-label={iconOnly ? "Add application" : undefined}
                     title={iconOnly ? "Add application" : undefined}
+                    disabled={disabled}
                 >
                     <Plus aria-hidden="true" />
-                    {!iconOnly && "Add Job"}
+                    {!iconOnly && (triggerLabel || "Add Job")}
                 </Button>
             </DialogTrigger>
             <DialogContent className="max-w-3xl max-h-[90vh] flex flex-col">

@@ -245,39 +245,51 @@
   }
 
   .dashboard-title {
-    font-size: clamp(1.75rem, 2.7vw, 2.25rem);
+    font-size: clamp(1.25rem, 2vw, 1.65rem);
     line-height: 1;
     color: #fff;
-    text-shadow: 0 1px 8px rgba(18, 57, 63, 0.24);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
   }
 
   .dashboard-page {
     background: url("/ocean-board-background.svg") center / cover no-repeat;
   }
 
+  .dashboard-topbar {
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px) saturate(115%);
+  }
+
+  .dashboard-topbar button {
+    color: #374151 !important;
+    background-color: rgba(255, 255, 255, 0.92) !important;
+    border-color: rgba(255, 255, 255, 0.85) !important;
+  }
+
   .dashboard-board-toolbar {
-    border: 1px solid transparent;
-    background: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 2px 8px rgba(31, 41, 55, 0.06);
+    backdrop-filter: blur(6px) saturate(115%);
   }
 
   .dashboard-board-toolbar button {
     letter-spacing: -0.01em;
-    color: #fff !important;
-    background-color: rgba(255, 255, 255, 0.3) !important;
-    border-color: rgba(255, 255, 255, 0.24) !important;
+    color: #374151 !important;
+    background-color: rgba(255, 255, 255, 0.86) !important;
+    border-color: #d1d5db !important;
     box-shadow: none !important;
   }
 
   .dashboard-board-toolbar button:hover,
   .dashboard-board-toolbar button[aria-expanded="true"] {
-    color: #fff !important;
-    background-color: rgba(255, 255, 255, 0.44) !important;
+    color: #111827 !important;
+    background-color: #fff !important;
   }
 
   .kanban-column-header button {
-    color: #fff !important;
+    color: #4b5563 !important;
     background-color: transparent !important;
     border-color: transparent !important;
     box-shadow: none !important;
@@ -285,8 +297,8 @@
 
   .kanban-column-header button:hover,
   .kanban-column-header button[aria-expanded="true"] {
-    color: #fff !important;
-    background-color: rgba(255, 255, 255, 0.16) !important;
+    color: #111827 !important;
+    background-color: rgba(17, 24, 39, 0.08) !important;
   }
 
   .kanban-columns {
@@ -296,41 +308,66 @@
     gap: 0.75rem;
   }
 
+  .kanban-scroll-area {
+    scrollbar-width: auto;
+    scrollbar-color: rgba(156, 163, 175, 0.8) rgba(31, 41, 55, 0.38);
+  }
+
+  .kanban-scroll-area::-webkit-scrollbar {
+    height: 12px;
+  }
+
+  .kanban-scroll-area::-webkit-scrollbar-track {
+    background: rgba(31, 41, 55, 0.38);
+  }
+
+  .kanban-scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(156, 163, 175, 0.8);
+    border: 2px solid rgba(31, 41, 55, 0.38);
+    background-clip: padding-box;
+  }
+
+  .kanban-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: rgba(209, 213, 219, 0.92);
+    background-clip: padding-box;
+  }
+
   .kanban-add-column {
-    border: 1px solid transparent;
-    background: rgba(255, 255, 255, 0.22);
-    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.64);
+    background: rgba(255, 255, 255, 0.72);
+    color: #374151;
     white-space: nowrap;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
   }
 
   .kanban-add-column:hover {
-    background: rgba(255, 255, 255, 0.3);
-    color: #fff;
+    background: #fff;
+    color: #111827;
   }
 
   .kanban-column {
     overflow: hidden;
-    border: 1px solid transparent;
-    background: rgba(255, 255, 255, 0.22) !important;
-    box-shadow: none;
-    backdrop-filter: blur(5px);
+    border: 1px solid rgba(209, 213, 219, 0.8);
+    background: rgba(249, 250, 251, 0.94) !important;
+    box-shadow: 0 2px 8px rgba(31, 41, 55, 0.1);
+    backdrop-filter: blur(8px);
   }
 
   .kanban-column-header {
-    border-bottom: 1px solid transparent;
+    border-bottom: 1px solid #e5e7eb;
+    background: rgba(249, 250, 251, 0.98);
   }
 
   .kanban-column-content {
-    background: transparent !important;
+    background: rgba(243, 244, 246, 0.72) !important;
   }
 
   .job-application-card {
-    border: 1px solid rgba(255, 255, 255, 0.38);
+    border: 1px solid #e5e7eb;
     border-radius: 0.75rem;
-    background: rgba(247, 246, 239, 0.88);
-    box-shadow: 0 2px 6px rgba(31, 50, 58, 0.08);
-    backdrop-filter: blur(5px);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 1px 2px rgba(31, 41, 55, 0.08);
+    backdrop-filter: blur(4px);
   }
 
   .job-application-card [data-slot="button"] {

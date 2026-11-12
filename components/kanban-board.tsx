@@ -125,14 +125,14 @@ function DroppableColumn({ column, boardId, sortedColumns, cardDisplay, filters,
     }
 
     return (
-        <Card className="kanban-column h-full min-h-0 p-0 flex flex-col">
+        <Card className="kanban-column h-fit max-h-full min-h-0 self-start p-0 flex flex-col">
             <CardHeader
                 className="kanban-column-header rounded-t-xl px-3 pb-2.5 pt-3"
             >
                 <div className="flex items-center justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-2">
-                        <CardTitle className="truncate text-[15px] font-semibold tracking-[-0.02em] text-white">{column.name}</CardTitle>
-                        <span className="rounded-full border border-white/40 px-2 py-0.5 text-[11px] font-medium tabular-nums tracking-wide text-white">
+                        <CardTitle className="truncate text-[15px] font-semibold tracking-[-0.02em] text-slate-800">{column.name}</CardTitle>
+                        <span className="rounded-full border border-slate-300 px-2 py-0.5 text-[11px] font-medium tabular-nums tracking-wide text-slate-500">
                             {jobs.length}
                         </span>
                     </div>
@@ -300,21 +300,25 @@ export default function KanbanBoard({ externalFilters }: { externalFilters?: Boa
 
                 {sortedColumns.length > 0 ? (
                     <div
-                        className="kanban-columns flex-1 min-h-0 overflow-x-auto overflow-y-hidden pb-3 w-full"
-                        style={{ gridAutoColumns: "min(82vw, 270px)" }}
+                        className="kanban-scroll-area flex-1 min-h-0 overflow-x-auto overflow-y-hidden w-full"
                     >
-                        {sortedColumns.map((col) => {
-                            return <DroppableColumn key={col._id} column={col} boardId={board?._id ?? ""} sortedColumns={sortedColumns} cardDisplay={cardDisplay} filters={externalFilters} sorting={sorting} />;
-                        })}
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            className="kanban-add-column h-10 w-full justify-center rounded-lg text-sm font-medium"
-                            onClick={() => setShowAddColumnDialog(true)}
+                        <div
+                            className="kanban-columns h-full w-max min-w-full px-2 sm:px-3"
+                            style={{ gridAutoColumns: "min(82vw, 270px)" }}
                         >
-                            <Plus className="h-4 w-4" />
-                            Add new list
-                        </Button>
+                            {sortedColumns.map((col) => {
+                                return <DroppableColumn key={col._id} column={col} boardId={board?._id ?? ""} sortedColumns={sortedColumns} cardDisplay={cardDisplay} filters={externalFilters} sorting={sorting} />;
+                            })}
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className="kanban-add-column h-10 w-full justify-center rounded-lg text-sm font-medium"
+                                onClick={() => setShowAddColumnDialog(true)}
+                            >
+                                <Plus className="h-4 w-4" />
+                                Add new list
+                            </Button>
+                        </div>
                     </div>
                 ) : (
                     <div className="flex-1 min-h-0 flex items-center justify-center py-20 text-center">
